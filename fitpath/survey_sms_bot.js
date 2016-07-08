@@ -12,19 +12,10 @@ var ConvoObjects = [
       'Do you like waffles?',
       'Do you like french toast?'
     ],
-    surveyId: '35435436afaf'
+    surveyId: '35435436afaf',
+    type: 'survey'
   },
-  {
-    userId: '3456ytrafda',
-    userMedium: 'sms',
-    userContactInfo: {name: 'Bob', phoneNumber: '+15064261732'},
-    questions: [
-      'Do you like pancakes?',
-      'Do you like waffles?',
-      'Do you like french toast?'
-    ],
-    surveyId: '32432534642'
-  },
+  
   {
     userId: '34q4wq4',
     userMedium: 'sms',
@@ -34,7 +25,8 @@ var ConvoObjects = [
       'Do you like waffles?',
       'Do you like french toast?'
     ],
-    surveyId: '23432423'
+    surveyId: '23432423',
+    type: 'survey'
   }
 ];
 
