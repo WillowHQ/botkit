@@ -12,7 +12,8 @@ var ConvoObjects = [
       'Do you like waffles?',
       'Do you like french toast?'
     ],
-    surveyId: '35435436afaf'
+    surveyId: '35435436afaf',
+    type: 'survey'
   },
   {
     userId: '3456ytrafda',
@@ -23,7 +24,8 @@ var ConvoObjects = [
       'Do you like waffles?',
       'Do you like french toast?'
     ],
-    surveyId: '32432534642'
+    surveyId: '32432534642',
+    type: 'survey'
   },
   {
     userId: '34q4wq4',
@@ -34,7 +36,8 @@ var ConvoObjects = [
       'Do you like waffles?',
       'Do you like french toast?'
     ],
-    surveyId: '23432423'
+    surveyId: '23432423',
+    type: 'survey'
   }
 ];
 
@@ -69,78 +72,98 @@ controller.hears('.*', 'message_received', function (bot, message) {
 
 
 module.exports.receiveConvo = function (convoObject) {
+  var _this = this;
   console.log('received convo');
-  console.log(JSON.stringify(convoObject));
+  console.log('73: ' + JSON.stringify(convoObject));
   bot.startPrivateConversation({user: convoObject.userContactInfo.phoneNumber, text: ''}, function (err, convo) {
-    if (convo.type == 'survey') {
-
+    if (convoObject.type == 'survey') {
       convo.say('Hi! Here\'s a survey your coach wanted me to send you.');
-      for (var i = 0; i < convoObject.questions.length; i++) {
-        console.log(convoObject.questions[i].question);
-        convo.ask(convoObject.questions[i].question, function (res, convo) {
-          console.log(res.text);
-          convo.next();
-        });
-      }
-      convo.say('Thanks for answering my questions. Enjoy the rest of your day ' + String.fromCodePoint(128578));
-      convo.on('end', function (convo) {
-        if (convo.status == 'completed') {
-          console.log();
-          console.log('ended');
-          console.log();
-          var responses = convo.extractResponses();
-          console.log('Responses: ' + responses);
-
-          var responseArray = [];
-          // In order to send responses back as an array in the right order, loop through questions array
+      setTimeout(function () {
+        console.log('in timeout callback');
+        _this.startSurvey(err, convo, convoObject);
+      }, 2000);
+    } else {
+      console.log('120: ' + JSON.stringify(convoObject));
+      // Must be a reminder
+      (function (convoObject) {
+        convo.ask(convoObject.questions[0], function (res, convo) {
+          console.log('123: ' + res.text);
+          console.log('124: ' + JSON.stringify(convoObject));
           var response = {};
+          response.type = 'reminder';
           response.assignment = convoObject.assignmentId;
           response.userId = convoObject.userId;
-          response.surveyTemplateId = convoObject.surveyId;
+          response.reminderId = convoObject.reminderId;
           response.questions = [];
-          for (var i = 0; i < convoObject.questions.length; i++) {
-            var question = convoObject.questions[i].question;
-            console.log('Question: ' + question);
-            // Responses are indexed by the question as a key
-            console.log('Response: ' + response);
-            // Push the response onto the responseArray
-            //responseArray.push(response);
-            response.questions[i] = convoObject.questions[i];
-            response.questions[i].answer = responses[question];
-          }
+          response.questions[0] = {};
+          response.questions[0].header = convoObject.questions[0];
+          response.questions[0].question = convoObject.questions[0];
+          response.questions[0].type = 'WRITTEN',
+          response.questions[0].answer = res.text;
+          console.log('136: ' + JSON.stringify(response));
           request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
-            console.log(err);
-            console.log(response);
-            console.log(body);
+            console.log('138: ' + JSON.stringify(body));
           });
-        }
-      });
-    } else {
-      // Must be a reminder
-      convo.ask(convoObject.questions[0], function (res, convo) {
-        console.log('121: ' + res.text);
-        console.log('122: ' + JSON.stringify(convoObject));
-        var response = {};
-        response.type = 'reminder';
-        response.assignment = convoObject.assignmentId;
-        response.userId = convoObject.userId;
-        response.reminderId = convoObject.reminderId;
-        response.questions = [];
-        response.questions[0] = {};
-        response.questions[0].header = convoObject.questions[0];
-        response.questions[0].question = convoObject.questions[0];
-        response.questions[0].type = 'WRITTEN',
-        response.questions[0].answer = res.text;
-        console.log('133: ' + JSON.stringify(response));
-        request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
-          console.log('135: ' + JSON.stringify(body));
         });
-      });
+      }(convoObject));
     }
   });
 };
 
-/*for (var i = 0; i < ConvoObjects.length; i++) {
-  var ConvoObject = ConvoObjects[i];
-  module.exports.receiveConvo(ConvoObject);
-}*/
+module.exports.startSurvey = function (err, convo, convoObject) {
+  var _this = this;
+  for (var i = 0; i < convoObject.questions.length; i++) {
+    console.log('82: ' + convoObject.questions[i]);
+      convo.ask(convoObject.questions[i], function (res, convo) {
+        console.log(res.text);
+        setTimeout(function () {
+          convo.next();
+        }, 1000);
+      });
+  }
+  setTimeout(function () {
+    _this.endSurvey(err, convo, convoObject);
+  }, 1000);
+};
+
+module.exports.endSurvey = function (err, convo, convoObject) {
+  convo.say('Thanks for answering my questions. Enjoy the rest of your day ' + String.fromCodePoint(128578));
+  convo.on('end', function (convo) {
+    if (convo.status == 'completed') {
+      console.log();
+      console.log('ended');
+      console.log();
+      var responses = convo.extractResponses();
+      console.log('Responses: ' + responses);
+
+      var responseArray = [];
+      // In order to send responses back as an array in the right order, loop through questions array
+      var response = {};
+      response.assignment = convoObject.assignmentId;
+      response.userId = convoObject.userId;
+      response.type = 'survey';
+      response.surveyTemplateId = convoObject.surveyId;
+      response.questions = [];
+      for (var i = 0; i < convoObject.questions.length; i++) {
+        var question = convoObject.questions[i].question;
+        console.log('Question: ' + question);
+        // Responses are indexed by the question as a key
+        console.log('Response: ' + response);
+        // Push the response onto the responseArray
+        //responseArray.push(response);
+        response.questions[i] = convoObject.questions[i];
+        response.questions[i].answer = responses[question];
+      }
+      // request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
+      //   console.log(err);
+      //   console.log(response);
+      //   console.log(body);
+      // });
+    }
+  });
+};
+
+//for (var i = 0; i < ConvoObjects.length; i++) {
+//  var ConvoObject = ConvoObjects[i];
+  module.exports.receiveConvo(ConvoObjects[0]);
+//}

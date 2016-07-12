@@ -5,7 +5,7 @@ var Botkit = require('../lib/Botkit.js');
 var serverIp = require('./env.js').serverIp;
 
 var request = require('request');
-
+var schedule = require('node-schedule');
 
 //var Promise = require('promise');
 
@@ -65,28 +65,15 @@ function init() {
 
   //should prob figure out a way to persist this
 
+  // Setup node-schedule to call doSomething() every minute, 24/7
+  var rule = new schedule.RecurrenceRule();
+  rule.dayOfWeek = [0, 1, 2, 3, 4, 5, 6];
+  schedule.scheduleJob(rule, doSomething);
+
 
   //TESTING promises
 
   //dispatchConvo();
-
-  //make sure it starts on the minmute
-
-  var d = new Date();
-
-  var seconds = d.getSeconds();
-  console.log("seconds are " + seconds);
-  var timeout = (60 - seconds) * 1000;
-  console.log("timeout is " + timeout);
-
-
-
-  setTimeout(startScheduler, timeout);
-
-}
-
-function startScheduler(){
-    var myVar = setInterval(doSomething, 60*1000);
 
 }
 function doSomething(){
