@@ -86,7 +86,7 @@ module.exports.receiveConvo = function (convoObject) {
       console.log('120: ' + JSON.stringify(convoObject));
       // Must be a reminder
       (function (convoObject) {
-        convo.ask(convoObject.questions[0], function (res, convo) {
+        convo.ask(convoObject.questions[0].question, function (res, convo) {
           console.log('123: ' + res.text);
           console.log('124: ' + JSON.stringify(convoObject));
           var response = {};
@@ -113,8 +113,8 @@ module.exports.receiveConvo = function (convoObject) {
 module.exports.startSurvey = function (err, convo, convoObject) {
   var _this = this;
   for (var i = 0; i < convoObject.questions.length; i++) {
-    console.log('82: ' + convoObject.questions[i]);
-      convo.ask(convoObject.questions[i], function (res, convo) {
+    console.log('82: ' + convoObject.questions[i].question);
+      convo.ask(convoObject.questions[i].question, function (res, convo) {
         console.log(res.text);
         setTimeout(function () {
           convo.next();
@@ -165,5 +165,5 @@ module.exports.endSurvey = function (err, convo, convoObject) {
 
 //for (var i = 0; i < ConvoObjects.length; i++) {
 //  var ConvoObject = ConvoObjects[i];
-  module.exports.receiveConvo(ConvoObjects[0]);
+//  module.exports.receiveConvo(ConvoObjects[0]);
 //}
