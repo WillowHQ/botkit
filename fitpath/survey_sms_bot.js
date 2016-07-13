@@ -1,4 +1,4 @@
-var Botkit = require('../lib/Botkit.js');
+all var Botkit = require('../lib/Botkit.js');
 var config = require('./env.js');
 var request = require('request');
 
@@ -15,7 +15,7 @@ var ConvoObjects = [
     surveyId: '35435436afaf',
     type: 'survey'
   },
-  
+
   {
     userId: '34q4wq4',
     userMedium: 'sms',
