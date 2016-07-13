@@ -15,6 +15,7 @@ var request = require('request');
 //specifically add twilio, fb and slack
 
 var bots = {
+  slack: require('./survey_slack_bot.js'),
   sms: require('./survey_sms_bot.js'),
   fb: require('./survey_messenger_bot.js')
 };
@@ -132,6 +133,10 @@ function dispatchConvo(convo){
   //figure out what bot to send the convo to then update the fact that the user is in a convo
   if (convo.userMedium == 'sms') {
     bots.sms.receiveConvo(convo);
+  }
+  else if(convo.userMedium == 'slack'){
+    console.log('slack convo');
+    bots.slack.receiveConvo(convo);
   }
 
 }

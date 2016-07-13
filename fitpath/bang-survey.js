@@ -66,9 +66,10 @@ controller.hears(['sendsurvey'],['direct_message'],function(bot,message) {
           Comment this out when using every user in team
         */
         clients_id = [
-          'U0M49UJ4V', //Matt
+          //'U0M49UJ4V', //Matt
           //'U0M4AB3M0', //Thom
           //'U0S68V5PX', //jo
+          'U136W8M0W'//josh
           'U1457G26Q' //josh_tester
         ];
 

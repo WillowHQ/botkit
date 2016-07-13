@@ -1,4 +1,4 @@
-all var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../lib/Botkit.js');
 var config = require('./env.js');
 var request = require('request');
 
