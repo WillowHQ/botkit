@@ -46,20 +46,21 @@ var config = require('./env.js');
 var request = require('request');
 
 var counter = 0;
+var _ = require('underscore');
 
-var convoObject =
-  {
-    userId: '5784f67bf87bfc21174bc93f',
-    userMedium: 'slack',
-    userContactInfo: {name: 'jlaver', slackId: 'U136W8M0W'},
-    questions: [
-      'Do you like pancakes?',
-      'Do you like waffles?',
-      'Do you like french toast?'
-    ],
-    surveyId: '35435436afaf',
-    type: 'survey'
-};
+// var convoObject =
+//   {
+//     userId: '5784f67bf87bfc21174bc93f',
+//     userMedium: 'slack',
+//     userContactInfo: {name: 'jlaver', slackId: 'U136W8M0W'},
+//     questions: [
+//       'Do you like pancakes?',
+//       'Do you like waffles?',
+//       'Do you like french toast?'
+//     ],
+//     surveyId: '35435436afaf',
+//     type: 'survey'
+// };
 
 
 
@@ -75,43 +76,20 @@ var bot = controller.spawn({
   json_file_store: '../db/',
 }).startRTM()
 
+var convoObject;
 
 
 
 
-
-module.exports.receiveConvo = function(convoObject){
+module.exports.receiveConvo = function(convo){
   console.log('received Convo');
-  console.log(JSON.stringify(convoObject));
-  bot.startConversation({user:'U136W8M0W'}, function(response, convo){
-    console.log("here");
-    convo.say("Hey client!");
-    //use code from the bottom
-    //function indise function
-
-
-
-
-    // if(err){
-    //   console.log(err);
-    // }
-    // if(convo.type == 'survey'){
-    //   console.log("conversation started!");
-    //   convo.say('Hi! Here\'s a survey your coach wanted me to send you.');
-    //   for(var i = 0; i < convoObject.questions.length; i++){
-    //     console.log(convoObject.questions[i].question);
-    //     convo.ask(convoObject.question[i].question, function(res, convo){
-    //       console.log(res.next);
-    //       convo.next();
-    //     });
-    //   }
-    // console.log('done');
-    //
-    //
-    //
-    // }
-  })
-
+  console.log(JSON.stringify(convo));
+  //, channel:'C0NGETH71'
+  convoObject = convo;
+  console.log("heabhb");
+  console.log(convoObject);
+  console.log("asdjasd");
+  bot.startPrivateConversation({user:convoObject.userContactInfo.slack_Id}, ask1);
 
 
 }
@@ -139,21 +117,21 @@ module.exports.receiveConvo = function(convoObject){
 
 
 
-// bot.startConversation({channel: '+15064706220', user: '+15064706220', text: ''}, function (err, convo) {
-//     convo.say('Hello!');
-//     convo.ask('What is your name?', function (res, convo) {
-//       convo.say(`Nice to meet you, ${res.text}!`);
-//       console.log(res.text);
-//       convo.next();
-//     });
-// });
-
-// controller.hears('.*', 'message_received', function (bot, message) {
-//   bot.reply(message, 'Sorry, my programmer was too lazy to come up with a response for that.');
-// });
+// // bot.startConversation({channel: '+15064706220', user: '+15064706220', text: ''}, function (err, convo) {
+// //     convo.say('Hello!');
+// //     convo.ask('What is your name?', function (res, convo) {
+// //       convo.say(`Nice to meet you, ${res.text}!`);
+// //       console.log(res.text);
+// //       convo.next();
+// //     });
+// // });
 //
-//
-//
+// // controller.hears('.*', 'message_received', function (bot, message) {
+// //   bot.reply(message, 'Sorry, my programmer was too lazy to come up with a response for that.');
+// // });
+// //
+// //
+// //
 // controller.hears('s','direct_message',  function (bot, message) {
 //   console.log('received convo');
 //
@@ -163,78 +141,120 @@ module.exports.receiveConvo = function(convoObject){
 //   //bot.startConversation(message, ask1);
 //   //bot.startPrivateConversation({user: convoObject.userContactInfo.slackId}, ask1);
 // });
-//
-// launchConvo = function(){
+
+// launchConvo = function(convoObject1){
+//   console.log('here');
 //   bot.startPrivateConversation({user: convoObject.userContactInfo.slackId}, ask1);
 // }
+
+ask1 = function(response, convo) {
+  console.log("hey");
+  if(counter < convoObject.questions.length){
+
+    convo.ask(convoObject.questions[counter++].question, function(response, convo) {
+      convo.say("Awesome.");
+      ask1(response, convo);
+      convo.next();
+    });
+  } else {
+    convo.say("Bye");
+    closeSurvey(response,convo);
+    //convo.next();
+  }
+};
 //
-// ask1 = function(response, convo) {
-//   if(counter < convoObject.questions.length){
-//
-//     convo.ask(convoObject.questions[counter++], function(response, convo) {
-//       convo.say("Awesome.");
-//       ask1(response, convo);
-//       convo.next();
-//     });
-//   } else {
-//     convo.say("Bye");
-//     closeSurvey(response,convo);
-//     convo.next();
-//   }
-// };
-//
-// closeSurvey = function(response, convo) {
-//   convo.on('end',function(convo) {
-//
-//     if (convo.status=='completed') {
-//       // do something useful with the users responses
-//       var res = convo.extractResponses();
-//       console.log(res);
-//
-//       //ok now format the responses
-//       submitResponse(res);
-//
-//       // reference a specific response by key
-//       //var value  = convo.extractResponse('key');
-//
-//       // ... do more stuff...
-//
-//     } else {
-//       // something happened that caused the conversation to stop prematurely
-//     }
-//
-//   });
-//
-// }
-// submitResponse = function(res) {
-//   var response = {};
-//   response.assignment = convoObject.assignmentId;
-//   response.userId = convoObject.userId;
-//   response.timeStamp = Date.now();
-//   if(typeof convoObject.surveyTemplateId !== 'undefined' && variable !== null){
-//     response.surveyTemplateId = convoObject.surveyId;}
-//   else if(typeof convoObject.reminderId !== 'undefined' && variable !== null) {response.reminderId = convoObject.surveyId;}
-//
-//   response.questions = [];
-//   for (var i = 0; i < convoObject.questions.length; i++) {
-//     var question = convoObject.questions[i].question;
-//     console.log('Question: ' + question);
-//     // Responses are indexed by the question as a key
-//     console.log('Response: ' + response);
-//     // Push the response onto the responseArray
-//     //responseArray.push(response);
-//     response.questions[i] = convoObject.questions[i];
-//     response.questions[i].answer = responses[question];
-//   }
-//   request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
-//     console.log(err);
-//     console.log(response);
-//     console.log(body);
-//   });
-//
-// }
+closeSurvey = function(response, convo) {
+  convo.on('end',function(convo) {
+
+    if (convo.status=='completed') {
+      // do something useful with the users responses
+      var res = convo.extractResponses();
+      console.log(res);
+
+      //ok now format the responses
+      sendResponses(res, convoObject.userContactInfo.slack_Id);
+      submitResponse(res);
+
+      // reference a specific response by key
+      //var value  = convo.extractResponse('key');
+
+      // ... do more stuff...
+
+    } else {
+      // something happened that caused the conversation to stop prematurely
+    }
+
+  });
+
+}
+submitResponse = function(res) {
+  var response = {};
+  response.assignment = convoObject.assignmentId;
+  response.userId = convoObject.userId;
+  response.timeStamp = Date.now();
+  if(typeof convoObject.surveyTemplateId !== 'undefined' && variable !== null){
+    response.surveyTemplateId = convoObject.surveyId;}
+  else if(typeof convoObject.reminderId !== 'undefined' && variable !== null) {response.reminderId = convoObject.surveyId;}
+
+  response.questions = [];
+  for (var i = 0; i < convoObject.questions.length; i++) {
+    var question = convoObject.questions[i].question;
+    console.log('Question: ' + question);
+    // Responses are indexed by the question as a key
+    console.log('Response: ' + response);
+    // Push the response onto the responseArray
+    //responseArray.push(response);
+    response.questions[i] = convoObject.questions[i];
+    response.questions[i].answer = res[question];
+    console.log(response.questions[i].answer);
+  }
+
+  request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
+    console.log(err);
+    console.log(response.questions);
+    console.log(body);
+  });
+
+}
 
 
+
+function sendResponses(response, id){
+  var responses = surveyResponseToString(response);
+  console.log('sned Responses');
+  var attachments = {
+    'username': 'survey',
+    'channel': 'C0NGETH71',
+    'attachments': [
+      {
+        'text': responses,
+        'color': '#81C784',
+        'title': '<@' + id + '>' + ' has completed their weekly survey!',
+        'fallback': '<@' + id + '>' + ' has completed their weekly survey!',
+        'mrkdwn_in' : [
+          'text',
+          'title',
+          'fallback'
+        ]
+      }
+    ],
+    'icon_url': 'https://i.imgsafe.org/1b33b2f.png'
+  }
+  console.log(attachments);
+  bot.say(attachments);
+}
+
+function surveyResponseToString(surveyObj) {
+
+  var result = _.reduce(surveyObj, function(output, item, key, surveyObj) {
+    if (key === Object.keys(surveyObj)[1]) {
+     output = "*" + Object.keys(surveyObj)[0] + "*: " + output + "\n";
+    }
+    return output + "*" + key + "*: " + item + "\n";
+
+  });
+  return result;
+}
 
 
 
