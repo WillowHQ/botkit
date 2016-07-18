@@ -66,6 +66,8 @@ var _ = require('underscore');
 
 //console.log(config.phoneNumber);
 
+
+//var convoObject;
 var controller = Botkit.slackbot({
     json_file_store: '../db/',
     debug: false
@@ -76,19 +78,222 @@ var bot = controller.spawn({
   json_file_store: '../db/',
 }).startRTM()
 
-var convoObject;
-
 
 
 
 module.exports.receiveConvo = function(convo){
+
+
   console.log('received Convo');
   console.log(JSON.stringify(convo));
   //, channel:'C0NGETH71'
-  convoObject = convo;
-  console.log("heabhb");
+  var convoObject = convo;
+
+
+
+  console.log("Starting a convo");
   console.log(convoObject);
-  console.log("asdjasd");
+
+  ask1 = function(response, convo){
+    console.log("ask1");
+
+
+    if(convoObject.questions[0]){
+      console.log("past if");
+
+      convo.ask(convoObject.questions[0].question, function(response, convo) {
+
+        convo.say("Awesome.");
+        console.log("ask2 start here");
+        console.log(convo);
+
+        //breaking with 2 different surveys at the same time
+        convo.next();
+        console.log("after next");
+
+        ask2(response, convo);
+
+      });
+
+    }else{
+      convo.say("Bye");
+      closeSurvey(response,convo);
+      convo.next();
+    }
+  }
+
+  ask2 = function(response, convo){
+    console.log("ask2");
+    if(convoObject.questions[1]){
+      console.log("past if");
+
+      convo.ask(convoObject.questions[1].question, function(response, convo) {
+
+        convo.say("Awesome.");
+        ask3(response, convo);
+        convo.next();
+      });
+
+    }else{
+      convo.say("Bye");
+      closeSurvey(response,convo);
+      convo.next();
+    }
+
+  }
+
+  ask3 = function(response, convo){
+    console.log("ask3");
+    if(convoObject.questions[2]){
+      console.log("past if");
+
+      convo.ask(convoObject.questions[2].question, function(response, convo) {
+
+        convo.say("Awesome.");
+        ask4(response, convo);
+        convo.next();
+      });
+
+    }else{
+      convo.say("Bye");
+      closeSurvey(response,convo);
+      convo.next();
+    }
+  }
+
+  var ask4 = function (response, convo) {
+    console.log("ask4");
+    if(convoObject.questions[3]){
+      console.log("past if");
+
+      convo.ask(convoObject.questions[3].question, function(response, convo) {
+
+        convo.say("Awesome.");
+        ask5(response, convo);
+        convo.next();
+      });
+
+    }else{
+      convo.say("Bye");
+      closeSurvey(response,convo);
+      convo.next();
+    }
+
+  }
+  var ask5 = function(response, convo){
+    console.log("ask5");
+    if(convoObject.questions[4]){
+      console.log("past if");
+
+      convo.ask(convoObject.questions[4].question, function(response, convo) {
+
+        convo.say("Awesome.");
+        convo.say("Bye");
+        closeSurvey(response,convo);
+        convo.next();
+      });
+
+    }else{
+      convo.say("Bye");
+      closeSurvey(response,convo);
+      convo.next();
+    }
+
+  }
+
+  closeSurvey = function(response, convo) {
+    convo.on('end',function(convo) {
+
+      if (convo.status=='completed') {
+        // do something useful with the users responses
+        var res = convo.extractResponses();
+        console.log(res);
+
+        //ok now format the responses
+        sendResponses(res, convoObject.userContactInfo.slack_Id);
+        submitResponse(res);
+
+        // reference a specific response by key
+        //var value  = convo.extractResponse('key');
+
+        // ... do more stuff...
+
+      } else {
+        // something happened that caused the conversation to stop prematurely
+      }
+
+    });
+
+  }
+  submitResponse = function(res) {
+    var response = {};
+    response.assignment = convoObject.assignmentId;
+    response.userId = convoObject.userId;
+    response.timeStamp = Date.now();
+    if(typeof convoObject.surveyTemplateId !== 'undefined' && variable !== null){
+      response.surveyTemplateId = convoObject.surveyId;}
+    else if(typeof convoObject.reminderId !== 'undefined' && variable !== null) {response.reminderId = convoObject.surveyId;}
+
+    response.questions = [];
+    for (var i = 0; i < convoObject.questions.length; i++) {
+      var question = convoObject.questions[i].question;
+      console.log('Question: ' + question);
+      // Responses are indexed by the question as a key
+      console.log('Response: ' + response);
+      // Push the response onto the responseArray
+      //responseArray.push(response);
+      response.questions[i] = convoObject.questions[i];
+      response.questions[i].answer = res[question];
+      console.log(response.questions[i].answer);
+    }
+
+    request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
+      console.log(err);
+      console.log(response.questions);
+      console.log(body);
+    });
+
+  }
+
+  function sendResponses(response, id){
+    var responses = surveyResponseToString(response);
+    console.log('sned Responses');
+    var attachments = {
+      'username': 'survey',
+      'channel': 'C0NGETH71',
+      'attachments': [
+        {
+          'text': responses,
+          'color': '#81C784',
+          'title': '<@' + id + '>' + ' has completed their weekly survey!',
+          'fallback': '<@' + id + '>' + ' has completed their weekly survey!',
+          'mrkdwn_in' : [
+            'text',
+            'title',
+            'fallback'
+          ]
+        }
+      ],
+      'icon_url': 'https://i.imgsafe.org/1b33b2f.png'
+    }
+    console.log(attachments);
+    bot.say(attachments);
+  }
+
+  function surveyResponseToString(surveyObj) {
+
+    var result = _.reduce(surveyObj, function(output, item, key, surveyObj) {
+      if (key === Object.keys(surveyObj)[1]) {
+       output = "*" + Object.keys(surveyObj)[0] + "*: " + output + "\n";
+      }
+      return output + "*" + key + "*: " + item + "\n";
+
+    });
+    return result;
+  }
+
+
+
   bot.startPrivateConversation({user:convoObject.userContactInfo.slack_Id}, ask1);
 
 
@@ -97,14 +302,126 @@ module.exports.receiveConvo = function(convo){
 
 
 
+//  var ask1 = function(response, convo) {
+//   console.log("ask1");
+//
+//   console.log("length:" + convoObject.questions.length);
+//   if(convoObject.questions[0]){
+//     console.log("past if");
+//
+//     convo.ask(convoObject.questions[0].question, function(response, convo) {
+//
+//       convo.say("Awesome.");
+//       ask2(response, convo);
+//       convo.next();
+//     });
+//
+//   }else{
+//     convo.say("Bye");
+//     closeSurvey(response,convo);
+//     convo.next();
+//   }
+// };
+
+// var ask2 = function(response, convo){
+//   console.log("ask2");
+//   if(convoObject.questions[1]){
+//     console.log("past if");
+//
+//     convo.ask(convoObject.questions[1].question, function(response, convo) {
+//
+//       convo.say("Awesome.");
+//       ask3(response, convo);
+//       convo.next();
+//     });
+//
+//   }else{
+//     convo.say("Bye");
+//     closeSurvey(response,convo);
+//     convo.next();
+//   }
+//
+// }
+//
+// var ask3 = function(response, convo){
+//   console.log("ask3");
+//   if(convoObject.questions[2]){
+//     console.log("past if");
+//
+//     convo.ask(convoObject.questions[2].question, function(response, convo) {
+//
+//       convo.say("Awesome.");
+//       ask4(response, convo);
+//       convo.next();
+//     });
+//
+//   }else{
+//     convo.say("Bye");
+//     closeSurvey(response,convo);
+//     convo.next();
+//   }
+// }
+//
+//
+// var ask4 = function (response, convo) {
+//   console.log("ask4");
+//   if(convoObject.questions[3]){
+//     console.log("past if");
+//
+//     convo.ask(convoObject.questions[3].question, function(response, convo) {
+//
+//       convo.say("Awesome.");
+//       ask5(response, convo);
+//       convo.next();
+//     });
+//
+//   }else{
+//     convo.say("Bye");
+//     closeSurvey(response,convo);
+//     convo.next();
+//   }
+//
+// }
+//
+// var ask5 = function(response, convo){
+//   console.log("ask5");
+//   if(convoObject.questions[4]){
+//     console.log("past if");
+//
+//     convo.ask(convoObject.questions[4].question, function(response, convo) {
+//
+//       convo.say("Awesome.");
+//       convo.say("Bye");
+//       closeSurvey(response,convo);
+//       convo.next();
+//     });
+//
+//   }else{
+//     convo.say("Bye");
+//     closeSurvey(response,convo);
+//     convo.next();
+//   }
+//
+// }
 
 
 
-
-
-
-
-
+// module.exports.ask1 = function(response, convo) {
+//   console.log("hey");
+//   if(counter < convoObject.questions.length){
+//
+//     convo.ask(convoObject.questions[convoObject.counter++].question, function(response, convo) {
+//       console.log(convoObject.counter);
+//       convo.say("Awesome.");
+//       ask1(response, convo);
+//       convo.next();
+//     });
+//   } else {
+//     convo.say("Bye");
+//     closeSurvey(response,convo);
+//     //convo.next();
+//   }
+// };
 
 
 
@@ -147,21 +464,7 @@ module.exports.receiveConvo = function(convo){
 //   bot.startPrivateConversation({user: convoObject.userContactInfo.slackId}, ask1);
 // }
 
-ask1 = function(response, convo) {
-  console.log("hey");
-  if(counter < convoObject.questions.length){
 
-    convo.ask(convoObject.questions[counter++].question, function(response, convo) {
-      convo.say("Awesome.");
-      ask1(response, convo);
-      convo.next();
-    });
-  } else {
-    convo.say("Bye");
-    closeSurvey(response,convo);
-    //convo.next();
-  }
-};
 //
 closeSurvey = function(response, convo) {
   convo.on('end',function(convo) {
@@ -172,7 +475,7 @@ closeSurvey = function(response, convo) {
       console.log(res);
 
       //ok now format the responses
-      sendResponses(res, convoObject.userContactInfo.slack_Id);
+      //sendResponses(res, convoObject.userContactInfo.slack_Id);
       submitResponse(res);
 
       // reference a specific response by key
@@ -255,100 +558,3 @@ function surveyResponseToString(surveyObj) {
   });
   return result;
 }
-
-
-
-
-//   if(convoObject.type == 'survey') {
-//     bot.startConversation({message, function (bot, message) {
-//
-//         bot.say('Hi! Here\'s a survey your coach wanted me to send you.');
-//         for (var i = 0; i < convoObject.questions.length; i++) {
-//           console.log(convoObject.questions[i].question);
-//           convo.ask(convoObject.questions[i].question, function (res, convo) {
-//             console.log(res.text);
-//             convo.next();
-//           });
-//         }
-//
-//       convo.say('Thanks for answering my questions. Enjoy the rest of your day ' + String.fromCodePoint(128578));
-//       }
-//     })
-//   }
-//
-//
-// });
-//
-//
-//
-
-
-//       convo.on('end', function (convo) {
-//         if (convo.status == 'completed') {
-//           console.log();
-//           console.log('ended');
-//           console.log();
-//           var responses = convo.extractResponses();
-//           console.log('Responses: ' + responses);
-//
-//           var responseArray = [];
-//           // In order to send responses back as an array in the right order, loop through questions array
-//           var response = {};
-//           response.assignment = convoObject.assignmentId;
-//           response.userId = convoObject.userId;
-//           response.surveyTemplateId = convoObject.surveyId;
-//           response.questions = [];
-//
-//           for (var i = 0; i < convoObject.questions.length; i++) {
-//             var question = convoObject.questions[i].question;
-//             console.log('Question: ' + question);
-//             // Responses are indexed by the question as a key
-//             console.log('Response: ' + response);
-//             // Push the response onto the responseArray
-//             //responseArray.push(response);
-//             response.questions[i] = convoObject.questions[i];
-//             response.questions[i].answer = responses[question];
-//           }
-//           console.log("Shouldn't leave this loop until convo is over ");
-//
-//           request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
-//             console.log(err);
-//             console.log(response);
-//             console.log(body);
-//           });
-//         }
-//
-//     } else {
-//       console.log("type is broken");
-//     }
-//
-//       // Must be a reminder
-//
-//
-// };
-// module.exports.receiveReminder = function (convoObject) {
-//   convo.ask(convoObject.questions[0], function (res, convo) {
-//     console.log('121: ' + res.text);
-//     console.log('122: ' + JSON.stringify(convoObject));
-//     var response = {};
-//     response.type = 'reminder';
-//     response.assignment = convoObject.assignmentId;
-//     response.userId = convoObject.userId;
-//     response.reminderId = convoObject.reminderId;
-//     response.questions = [];
-//     response.questions[0] = {};
-//     response.questions[0].header = convoObject.questions[0];
-//     response.questions[0].question = convoObject.questions[0];
-//     response.questions[0].type = 'WRITTEN',
-//     response.questions[0].answer = res.text;
-//     console.log('133: ' + JSON.stringify(response));
-//     request.post({url: 'http://' + config.serverIp + ':12557/api/response/create', json: true, body: response}, function (err, response, body) {
-//       console.log('135: ' + JSON.stringify(body));
-//     });
-//   });
-// };
-
-// for (var i = 0; i < ConvoObjects.length; i++) {
-//   var ConvoObject = ConvoObjects[i];
-//   module.exports.initiateConvo(ConvoObject);
-// }

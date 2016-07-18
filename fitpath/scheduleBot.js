@@ -3,7 +3,7 @@
 
 var Botkit = require('../lib/Botkit.js');
 var serverIp = require('./env.js').serverIp;
-
+var _ = require('underscore');
 var request = require('request');
 
 
@@ -106,27 +106,40 @@ function doSomething(){
 }
 function scheduleConvos(convos) {
   console.log('scheduling');
+  console.log(convos);
   //first this function checks if the user is already in a convo,
 
   //for( go thru all the convos)
   //get user for each convo
-  for (var i = 0; i < convos.length; i++) {
-    var convo = convos[i];
-    console.log(convo);
-    var userId = convo.userId;
 
-    if(isUserInConvo(userId)){
-      console.log("user already in convo");
-      addConvoToQue(convo);
+  _.each(convos, function(convo){
+      console.log(convo.userId);
+      var userId = convo.userId;
 
-    } else {
-      console.log("dispatching convo");
-      dispatchConvo(convo);
+      if(isUserInConvo(userId)){
+        console.log("user already in convo");
+        addConvoToQue(convo);
+
+      } else {
+        console.log("dispatching convo");
+        dispatchConvo(convo);
 
       }
-  }
+    }, convos);
+
+  //
+  // for (var i = 0; i < convos.length; i++)
+  //   var convo = convos[i];
+  //   console.log(convo);
+  //   var userId = convo.userId;
+
+
   // then it
 }
+
+
+
+
 function dispatchConvo(convo){
   //merge the questions thing from twilio sms bot and frank
 
