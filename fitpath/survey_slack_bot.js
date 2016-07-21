@@ -100,7 +100,7 @@ module.exports.receiveConvo = function(convo){
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
-      convo.say("Awesome.");
+    
       convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
         convo.say("Awesome.");
