@@ -100,7 +100,7 @@ module.exports.receiveConvo = function(convo){
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
-
+      convo.say("Awesome.");
       convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
         convo.say("Awesome.");
@@ -230,9 +230,22 @@ module.exports.receiveConvo = function(convo){
     response.assignment = convo.convoObject.assignmentId;
     response.userId = convo.convoObject.userId;
     response.timeStamp = Date.now();
-    if(typeof convo.convoObject.surveyTemplateId !== 'undefined' && variable !== null){
-      response.surveyTemplateId = convo.convoObject.surveyId;}
-    else if(typeof convo.convoObject.reminderId !== 'undefined' && variable !== null) {response.reminderId = convo.convoObject.surveyId;}
+    // if(typeof convo.convoObject.surveyTemplateId !== 'undefined' && variable !== null){
+    //   response.surveyTemplateId = convo.convoObject.surveyId;}
+    // else if(typeof convo.convoObject.reminderId !== 'undefined' && variable !== null) {response.reminderId = convo.convoObject.surveyId;}
+    //
+    if(convo.convoObject.type && convo.convoObject.type === 'survey'){
+        console.log('server');
+        console.log(convo.convoObject.surveyId);
+        response.surveyTemplateId = convo.convoObject.surveyId;
+    }
+    else if (convo.convoObject.type && convo.convoObject.type === 'reminder'){
+      console.log('server');
+      console.log(convo.convoObject.reminderId);
+      response.reminderId = convo.convoObject.reminderId;
+    }
+
+
 
     response.questions = [];
     for (var i = 0; i < convo.convoObject.questions.length; i++) {
@@ -293,7 +306,8 @@ module.exports.receiveConvo = function(convo){
   }
 
 
-
+  console.log(convoObject.userContactInfo.slack_Id);
+  console.log(convoObject.type);
   bot.startPrivateConversation({user:convoObject.userContactInfo.slack_Id}, ask1);
 
 
