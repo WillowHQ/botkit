@@ -8,7 +8,7 @@ var app = express();
 
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
-app.use(express.static('bangfitnesspublic'));
+app.use(express.static(__dirname + '/bangfitnesspublic'));
 
 app.get('/webhook', function (req, res) {
   if (req.query['hub.mode'] === 'subscribe' &&
