@@ -80,6 +80,80 @@ var bot = controller.spawn({
 
 
 
+controller.hears(['reminder'],['direct_message'],function(bot,message) {
+  console.log("yes!");
+
+
+  console.log(bot.botkit.storage.users);
+  console.log(message);
+  reminderConverstion(bot, message);
+
+});
+
+
+
+
+var reminderConverstion = function(bot, message){
+  bot.startConversation(message, function(err, convo){
+    console.log('here');
+    convo.say("Josh is the best!")
+    convo.ask("Would you like to make a reminder?",
+
+    [
+      {
+        pattern: bot.utterances.yes, //stuck on yes
+        callback: function(response, convo){
+          convo.say("Great! I will continue...");
+          question1(response, convo);
+          convo.next();
+        }
+      },
+      {
+        pattern: bot.utterances.no,
+        callback: function(response, convo){
+          convo.say('Have a good day!');
+          convo.next();
+        }
+      },
+      {
+        default: true,
+        callback: function(response, convo){
+          convo.say("Yes or No")
+          convo.repeat();
+          convo.next();
+        }
+      }
+
+    ]
+    )
+
+  });
+};
+
+
+var question1 = function(response, convo){
+  console.log("ask1");
+  convo.ask("What do you want your reminder to say?", function(response, convo){
+    convo.say("Sweet");
+    question2(response, convo);
+  });
+
+};
+
+
+var question2 = function(response, convo){
+  console.log('ask2');
+//  convo.ask("What time of day? hh/mm/")
+
+}
+
+
+
+
+
+
+
+
 
 module.exports.receiveConvo = function(convo){
 
@@ -100,7 +174,7 @@ module.exports.receiveConvo = function(convo){
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
-    
+
       convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
         convo.say("Awesome.");
