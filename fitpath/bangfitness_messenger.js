@@ -1,116 +1,226 @@
-'use strict';
-
+var Botkit = require('../lib/Botkit.js');
 var express = require('express');
-var bodyParser = require('body-parser');
-var request = require('request');
-
 var app = express();
 
-app.use(bodyParser.urlencoded());
-app.use(bodyParser.json());
-app.use(express.static(__dirname + '/bangfitnesspublic'));
+app.use('/', express.static(__dirname + '/bangfitnesspublic'));
 
-app.get('/webhook', function (req, res) {
-  if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === 'FISH_TACOS') {
-    console.log('Validating webhook');
-    res.status(200).send(req.query['hub.challenge']);
-  } else {
-    console.error('Failed validation. Make sure the validation tokens match.');
-    res.sendStatus(403);
-  }
+app.listen(3001, function () {
+  console.log('App listening on port 3001');
 });
 
-app.post('/webhook', function (req, res) {
-  var data = req.body;
-
-  if (data.object == 'page') {
-    data.entry.forEach(function (entry) {
-      entry.messaging.forEach(function (messagingEvent) {
-        if (messagingEvent.optin) {
-          sendWelcomeMessage(messagingEvent.sender.id);
-          // The user clicked the 'Send to Messenger' button
-        } else if (messagingEvent.message) {
-          // The user sent a message to the bot.
-          receivedMessage(messagingEvent);
-        }
-      });
-    });
-  }
-
-  res.sendStatus(200);
+var controller = Botkit.facebookbot({
+  access_token: 'EAAD0LsmI8VABAEcFZCXoCCZC6srqcInDD6c6eozD2XdZBu6DGu9slevF0bn91aLEiGW3tLZAJBfR2UKFMd8KSrGsxySOjZAK30T8gr34H9MoTbgCVMxLYYRJbPdKKbZBOxoezurLCnT6AJ8oQFz5ci5MASH2pAZBFhG5SHttkOleQZDZD',
+  verify_token: 'FISH_TACOS'
 });
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+var bot = controller.spawn({});
+
+controller.setupWebserver(3000, function (err, webserver) {
+  controller.createWebhookEndpoints(webserver, bot, function () {
+    console.log('Bot online');
+  });
 });
 
-function sendWelcomeMessage (recipientId) {
+controller.on('facebook_optin', function (bot, message) {
   var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: "Hi, welcome to Bang Fitness. What kind of help would you like?",
+    text: "Hi, this is Omnapatopea. I'm a robot!\n\nI'm contacting you because you reached out to Bang Fitness.\n\nI'm not very good with most subjects (because of the whole robot thing) but I can help you get whatever information you need.\n\nAre you interested in:",
+    quick_replies: [
+      {
+        content_type: "text",
+        title: "Visiting BangFitness",
+        payload: "VISITING_BANG_FITNESS"
+      },
+      {
+        content_type: "text",
+        title: "About our approach",
+        payload: "LEARNING_MORE_ABOUT_OUR__APPROACH"
+      },
+      {
+        content_type: "text",
+        title: "Technique advice",
+        payload: "GETTING_MORE_SPECIFIC_ADVICE_ON_EXERCISE_TECHNIQUE"
+      },
+      {
+        content_type: "text",
+        title: "Training programs",
+        payload: "TRAINING_PROGRAM_DESIGN"
+      },
+      {
+        content_type: "text",
+        title: "Nutrition",
+        payload: "NUTRITION"
+      },
+      {
+        content_type: "text",
+        title: "Something else",
+        payload: "SOMETHING_ELSE"
+      }
+    ]
+  };
+
+  bot.reply(message, messageData);
+});
+
+controller.hears('Visiting BangFitness', 'message_received', function (bot, message) {
+  bot.startConversation(message, function (err, convo) {
+    var messageData = {
+      text: "I can definitely help you with that. Are evenings or daytimes better for you?",
       quick_replies: [
         {
           content_type: "text",
-          title: "Workouts",
-          payload: "WORKOUTS"
+          title: "Evenings",
+          payload: "EVENINGS"
         },
         {
           content_type: "text",
-          title: "Nutrition",
-          payload: "NUTRITION"
+          title: "Daytimes",
+          payload: "DAYTIMES"
         }
       ]
-    }
-  };
+    };
 
-  callSendAPI(messageData);
-}
-
-function callSendAPI (messageData) {
-  request({
-    uri: 'https://graph.facebook.com/v2.7/me/messages',
-    qs: { access_token: 'EAAD0LsmI8VABAAw6pbZC3ubec2vPnNKQwYNbcG915lPWIkWaGYZBw7wVeFcLklJIA0WYnfiEtKE0VN03syVTRBqWVBVmNQbkZAh2m095xK2zg7Pf9q1gBRONzvoSSSwZCraW2EhPPcQZAzhVLdrvtBeETezmwc9dzlSsZCEzPfZAAZDZD'},
-    method: 'POST',
-    json: messageData
-  }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      console.log('Success');
-    } else {
-      console.error('Unable to send message.');
-      console.error(response);
-      console.error(error);
-    }
+    convo.ask(messageData, function (response, convo) {
+      messageData = {
+        text: "Got it. Are you free tomorrow?",
+        quick_replies: [
+          {
+            content_type: "text",
+            title: "Yes",
+            payload: "YES"
+          },
+          {
+            content_type: "text",
+            title: "No",
+            payload: "NO"
+          }
+        ]
+      };
+      convo.ask(messageData, function (response, convo) {
+        if (response.text == 'No') {
+          convo.ask('What\'s another day that would work?', function (response, convo) {
+            convo.ask('What time would be best?', function (response, convo) {
+              convo.say('Ok, I\'ll ask someone from our team to get in contact via e-mail.');
+              convo.next();
+            });
+            convo.next();
+          });
+        } else {
+          convo.ask('What time would be best?', function (response, convo) {
+            convo.say('Ok, I\'ll ask someone from our team to get in contact via e-mail.');
+            convo.next();
+          });
+        }
+        convo.next();
+      });
+      convo.next();
+    });
+    convo.next();
   });
-}
+});
 
-function receivedMessage (event) {
-  var senderId = event.sender.id;
-  var messageText = event.message.text;
+controller.hears('About our approach', 'message_received', function (bot, message) {
+  bot.startConversation(message, function (err, convo) {
+    messageData = {
+      text: "That would be our pleasure. Would you prefer a phone call or an e-mail?",
+      quick_replies: [
+        {
+          content_type: "text",
+          title: "Phone call",
+          payload: "PHONE_CALL"
+        },
+        {
+          content_type: "text",
+          title: "E-mail",
+          payload: "EMAIL"
+        }
+      ]
+    };
+    convo.ask(messageData, function (response, convo) {
+      if (response.text == 'Phone call') {
+        convo.ask('No problem. What\'s your number?', function (response, convo) {
+          convo.ask('What\'s a good time to call?', function (response, convo) {
+            convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+          });
+        });
+      } else {
+        convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+      }
+      convo.next();
+    });
+    convo.next();
+  });
+});
 
-  if (messageText) {
-    if (messageText === 'Workouts') {
-      sendTextMessage(senderId, 'Try doing 25 pushups every morning for the next week.');
-    } else {
-      sendTextMessage(senderId, 'Try eating less potato chips after 6pm.');
-    }
-  } else {
-    sendTextMessage(senderId, 'I\'m sorry, but I\'m not sure what you mean.')
-  }
-}
+controller.hears(['Technique advice', 'Training programs', 'Nutrition'], 'message_received', function (bot, message) {
+  bot.startConversation(message, function (err, convo) {
+    convo.ask('That\'s one of our favourite things. What would you specifically like to learn about?', function (response, convo) {
+      messageData = {
+        text: "That would be our pleasure. Would you prefer a phone call or an e-mail?",
+        quick_replies: [
+          {
+            content_type: "text",
+            title: "Phone call",
+            payload: "PHONE_CALL"
+          },
+          {
+            content_type: "text",
+            title: "E-mail",
+            payload: "EMAIL"
+          }
+        ]
+      };
+      convo.ask(messageData, function (response, convo) {
+        if (response.text == 'Phone call') {
+          convo.ask('No problem. What\'s your number?', function (response, convo) {
+            convo.ask('What\'s a good time to call?', function (response, convo) {
+              convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+              convo.next();
+            });
+            convo.next();
+          });
+        } else {
+          convo.say('Sounds great. I\'m a robot so I don\'t feel things but our team is looking forward to speaking with you!');
+        }
+        convo.next();
+      });
+      convo.next();
+    });
+    convo.next();
+  });
+});
 
-function sendTextMessage (recipientId, messageText) {
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: messageText
-    }
-  };
-
-  callSendAPI(messageData);
-}
+controller.hears('Something else', 'message_received', function (bot, message) {
+  bot.startConversation(message, function (err, convo) {
+      messageData = {
+        text: "I\'ll ask on of our team members to get in touch with you. Would you prefer a phone call or an e-mail?",
+        quick_replies: [
+          {
+            content_type: "text",
+            title: "Phone call",
+            payload: "PHONE_CALL"
+          },
+          {
+            content_type: "text",
+            title: "E-mail",
+            payload: "EMAIL"
+          }
+        ]
+      };
+      convo.ask(messageData, function (response, convo) {
+        if (response.text == 'Phone call') {
+          convo.ask('No problem. What\'s your number?', function (response, convo) {
+            convo.ask('What\'s a good time to call?', function (response, convo) {
+              convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+              convo.next();
+            });
+            convo.next();
+          });
+        } else {
+          convo.say('Sounds great. I\'m a robot so I don\'t feel things but our team is looking forward to speaking with you!');
+          convo.next();
+        }
+        convo.next();
+      });
+    convo.next();
+  });
+});
