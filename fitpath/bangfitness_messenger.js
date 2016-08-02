@@ -1,17 +1,17 @@
 var Botkit = require('../lib/Botkit.js');
-var express = require('express');
-var morgan = require('morgan');
-var app = express();
-var http = require('http').Server(app);
+// var express = require('express');
+// var morgan = require('morgan');
+// var app = express();
+// var http;// = require('http').Server(app);
+//
+// app.use(morgan('dev'));
 
-app.use(morgan('dev'));
-
-console.log(__dirname + '/bangfitnesspublic');
-app.use('/', express.static(__dirname + '/bangfitnesspublic'));
-
-app.listen(3001, function () {
-  console.log('App listening on port 3001');
-});
+// console.log(__dirname + '/bangfitnesspublic');
+// app.use('/', express.static(__dirname + '/bangfitnesspublic'));
+//
+// app.listen(3001, function () {
+//   console.log('App listening on port 3001');
+// });
 
 var controller = Botkit.facebookbot({
   access_token: 'EAAD0LsmI8VABAEcFZCXoCCZC6srqcInDD6c6eozD2XdZBu6DGu9slevF0bn91aLEiGW3tLZAJBfR2UKFMd8KSrGsxySOjZAK30T8gr34H9MoTbgCVMxLYYRJbPdKKbZBOxoezurLCnT6AJ8oQFz5ci5MASH2pAZBFhG5SHttkOleQZDZD',
@@ -20,12 +20,12 @@ var controller = Botkit.facebookbot({
 
 var bot = controller.spawn({});
 
-//controller.setupWebserver(3000, function (err, webserver) {
-controller.createWebhookEndpoints(http, bot, function () {
-  console.log('Bot online');
-  console.log('Free stuff pl0x');
+controller.setupWebserver(3000, function (err, webserver) {
+  controller.createWebhookEndpoints(http, bot, function () {
+    console.log('Bot online');
+    console.log('Free stuff pl0x');
+  });
 });
-//});
 
 controller.on('facebook_optin', function (bot, message) {
   var messageData = {
