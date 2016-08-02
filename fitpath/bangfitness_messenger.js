@@ -1,12 +1,12 @@
 var Botkit = require('../lib/Botkit.js');
 var express = require('express');
+var morgan = require('morgan');
 var app = express();
+
+app.use(morgan('dev'));
 
 console.log(__dirname + '/bangfitnesspublic');
 app.use('/', express.static(__dirname + '/bangfitnesspublic'));
-app.get('/', function (req, res) {
-  console.log('GET /');
-});
 
 app.listen(3001, function () {
   console.log('App listening on port 3001');
