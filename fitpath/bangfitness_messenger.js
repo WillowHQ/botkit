@@ -2,6 +2,7 @@ var Botkit = require('../lib/Botkit.js');
 var express = require('express');
 var morgan = require('morgan');
 var app = express();
+var http = require('http').Server(app);
 
 app.use(morgan('dev'));
 
@@ -20,7 +21,7 @@ var controller = Botkit.facebookbot({
 var bot = controller.spawn({});
 
 //controller.setupWebserver(3000, function (err, webserver) {
-controller.createWebhookEndpoints(app, bot, function () {
+controller.createWebhookEndpoints(http, bot, function () {
   console.log('Bot online');
   console.log('Free stuff pl0x');
 });
