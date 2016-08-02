@@ -94,7 +94,7 @@ function handleFacebook (obj) {
 
         }
         else {
-          controller.log('Got an unexpected message from Facebook: ', facebook_message);
+          console.log('Got an unexpected message from Facebook: ', facebook_message);
         }
       }
     }
@@ -112,7 +112,7 @@ app.get('/webhook', function (req, res) {
 app.post('/webhook', function (req, res) {
   handleFacebook(req.body);
 
-  res.send('Ok');
+  res.send(200);
 });
 
 //controller.setupWebserver(3000, function (err, webserver) {
