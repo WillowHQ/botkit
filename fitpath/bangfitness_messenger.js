@@ -126,7 +126,7 @@ app.get('/webhook', function (req, res) {
 });
 
 app.post('/webhook', function (req, res) {
-  handleFacebook(req.body);
+  //handleFacebook(req.body);
 
   res.send('Ok');
 });
