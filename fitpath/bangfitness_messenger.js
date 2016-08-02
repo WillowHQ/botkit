@@ -117,6 +117,14 @@ function handleFacebook (obj) {
   }
 }
 
+app.get('/webhook', function (req, res) {
+  if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === 'FISH_TACOS') {
+    res.send(req.query['hub.challenge']);
+  } else {
+    res.send('Incorrect verify token');
+  }
+});
+
 app.post('/webhook', function (req, res) {
   handleFacebook(req.body);
 
