@@ -2,6 +2,7 @@ var Botkit = require('../lib/Botkit.js');
 var express = require('express');
 var app = express();
 
+console.log(__dirname + '/bangfitnesspublic');
 app.use('/', express.static(__dirname + '/bangfitnesspublic'));
 
 app.listen(3001, function () {
@@ -15,11 +16,11 @@ var controller = Botkit.facebookbot({
 
 var bot = controller.spawn({});
 
-controller.setupWebserver(3000, function (err, webserver) {
-  controller.createWebhookEndpoints(webserver, bot, function () {
+//controller.setupWebserver(3000, function (err, webserver) {
+  controller.createWebhookEndpoints(app, bot, function () {
     console.log('Bot online');
   });
-});
+//});
 
 controller.on('facebook_optin', function (bot, message) {
   var messageData = {
