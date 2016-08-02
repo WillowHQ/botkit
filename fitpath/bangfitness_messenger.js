@@ -19,18 +19,8 @@ var controller = Botkit.facebookbot({
 
 var bot = controller.spawn({});
 
-function create_user_if_new (id, ts) {
-  controller.storage.users.get(id, function (err, user) {
-    if (err) {
-      console.log(err);
-    } else if (!user) {
-      controller.storage.users.save({id: id, created_at: ts});
-    }
-  });
-}
-
 function handleFacebook (obj) {
-  controller.debug('GOT A MESSAGE HOOK');
+  console.log('Got a message hook');
   if (obj.entry) {
     for (var e = 0; e < obj.entry.length; e++) {
       for (var m = 0; m < obj.entry[e].messaging.length; m++) {
@@ -50,9 +40,6 @@ function handleFacebook (obj) {
               mid: facebook_message.message.mid,
               attachments: facebook_message.message.attachments,
           }
-
-          //save if user comes from m.me adress or Facebook search
-          create_user_if_new(facebook_message.sender.id, facebook_message.timestamp)
 
           controller.receiveMessage(bot, message);
         }
@@ -91,9 +78,6 @@ function handleFacebook (obj) {
               timestamp: facebook_message.timestamp,
           };
 
-          //save if user comes from "Send to Messenger"
-          create_user_if_new(facebook_message.sender.id, facebook_message.timestamp)
-
           controller.trigger('facebook_optin', [bot, message]);
         }
         //message delivered callback
@@ -126,7 +110,7 @@ app.get('/webhook', function (req, res) {
 });
 
 app.post('/webhook', function (req, res) {
-  //handleFacebook(req.body);
+  handleFacebook(req.body);
 
   res.send('Ok');
 });
