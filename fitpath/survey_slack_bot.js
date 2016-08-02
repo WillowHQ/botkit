@@ -80,6 +80,218 @@ var bot = controller.spawn({
 
 
 
+controller.hears(['reminder'],['direct_message'],function(bot,message) {
+  console.log("yes!");
+
+
+  console.log(bot.botkit.storage.users);
+  console.log(message);
+  reminderConverstion(bot, message);
+
+});
+
+
+
+
+var reminderConverstion = function(bot, message){
+  bot.startConversation(message, function(err, convo){
+    console.log('here');
+    convo.say("Josh is the best!")
+    convo.ask("Would you like to make a reminder?",
+
+    [
+      {
+        pattern: bot.utterances.yes, //stuck on yes
+        callback: function(response, convo){
+          convo.say("Great! I will continue...");
+          question1(response, convo);
+          convo.next();
+        }
+      },
+      {
+        pattern: bot.utterances.no,
+        callback: function(response, convo){
+          convo.say('Have a good day!');
+          convo.next();
+        }
+      },
+      {
+        default: true,
+        callback: function(response, convo){
+          convo.say("Yes or No")
+          convo.repeat();
+          convo.next();
+        }
+      }
+
+    ]
+    )
+
+  });
+};
+
+
+var question1 = function(response, convo){
+  console.log("ask1");
+  convo.ask("What do you want your reminder to say?", function(response, convo){
+    convo.say("Awesome");
+    question2(response, convo);
+    convo.next();
+  },{key:"body"});
+
+};
+
+
+var question2 = function(response, convo){
+  console.log('ask2');
+  convo.ask("What time of day?(24 hours) hh:mm", function(response, convo){
+    //if statment checking if the time was rightly formated
+
+    convo.say("Awesome");
+    question3(response, convo);
+    convo.next();
+  },{key:"time"});
+};
+
+var question3 = function(response, convo){
+  console.log('ask3');
+  convo.ask("What days of the week?\n sun,mon,tues,wed,thurs,fri,sat \n Order matters \n Ex: mon,wed,sat", function(response, convo){
+    console.log("in ask3");
+    convo.say("Awesome");
+    convo.say("Bye");
+    console.log(response);
+    console.log(response.text);
+    //err checking
+
+
+    endReminder(response, convo);
+    convo.next();
+
+  },{key:"week"})
+
+}
+
+
+var endReminder = function (response, convo) {
+  convo.on('end',function(convo) {
+
+    if (convo.status=='completed') {
+      // do something useful with the users responses
+      var res = convo.extractResponses();
+      console.log(res);
+      console.log("sadas");
+
+      //ok now format the responses
+      //sendResponses(res, convo.convoObject.userContactInfo.slack_Id);
+      //submitResponse(res, convo);
+
+      // reference a specific response by key
+
+      sendOutReminder(res, convo);
+      // ... do more stuff...
+
+    } else {
+      console.log("error");
+      // something happened that caused the conversation to stop prematurely
+    }
+
+  });
+
+}
+
+
+var sendOutReminder = function(res, convo){
+  console.log("sendOutReminder");
+
+  var days1 = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+
+  var dates = {
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false,
+      saturday: false,
+      sunday: false
+  };
+
+  var days = [];
+  // var hour = this.time.getHours();
+  // var minute = this.time.getMinutes();
+
+  var hour = res.time.slice(0,2)
+  var min = res.time.slice(4, 2)
+  console.log(hour);
+  console.log(res.time);
+
+  if (res.week.indexOf('sun') != -1) {
+      dates.sunday = true;
+      days.splice(days1.length,0,0);
+  }
+  if (res.week.indexOf('mon') != -1) {
+      dates.monday = true;
+      days.splice(days1.length,0,1);
+  }
+  if (res.week.indexOf('tues') != -1) {
+      dates.tuesday = true;
+      days.splice(days1.length,0,2);
+  }
+  if (res.week.indexOf('wed') != -1) {
+      dates.wednesday = true;
+      days.splice(days1.length,0,3);
+  }
+  if (res.week.indexOf('thurs') != -1) {
+      dates.thursday = true;
+      days.splice(days1.length,0,4);
+  }
+  if (res.week.indexOf('fri') != -1) {
+      dates.friday = true;
+      days.splice(days1.length,0,5);
+  }
+  if (res.week.indexOf('sat') != -1) {
+      dates.saturday = true;
+      days.splice(days1.length,0,6);
+  }
+  console.log("dates");
+  console.log(dates);
+  console.log("days");
+  console.log(days);
+
+
+  // var reminder = {
+  //     _id: this._id,
+  //     title: this.reminder,
+  //     days: days,
+  //
+  //     // Will this be set to server time or user's local time?
+  //     //toLocaleTimeString(),
+  //     timeOfDay: this.time,
+  //     hour: hour,
+  //     minute: minute,
+  //     selectedDates: this.selectedDays,
+  //     daysOfTheWeek: dates,
+  //     author: this.author,
+  //     assignee: this.assignee,
+  //     responses: this.responses
+  //
+  // };
+
+
+  var reminder = {
+    title: res.body,
+
+  }
+
+
+
+
+
+}
+
+
+
+
+
 
 module.exports.receiveConvo = function(convo){
 
@@ -100,7 +312,7 @@ module.exports.receiveConvo = function(convo){
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
-    
+
       convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
         convo.say("Awesome.");
