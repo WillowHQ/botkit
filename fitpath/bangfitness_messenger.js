@@ -30,7 +30,7 @@ controller.setupWebserver(3000, function (err, webserver) {
 function sendGreeting (bot, message) {
   console.log('sendGreeting');
 
-  var greetingData = {
+  var messageData = {
     text: "Hi, this is Omnapatopea. I'm a robot!\n\nI'm contacting you because you reached out to Bang Fitness.\n\nI'm not very good with most subjects (because of the whole robot thing) but I can help you get whatever information you need.\n\nAre you interested in:",
     quick_replies: [
       {
