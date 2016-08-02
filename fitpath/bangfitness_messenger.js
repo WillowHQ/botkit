@@ -4,6 +4,9 @@ var app = express();
 
 console.log(__dirname + '/bangfitnesspublic');
 app.use('/', express.static(__dirname + '/bangfitnesspublic'));
+app.get('/', function (req, res) {
+  console.log('GET /');
+});
 
 app.listen(3001, function () {
   console.log('App listening on port 3001');
