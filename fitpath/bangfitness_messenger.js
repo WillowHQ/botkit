@@ -1,6 +1,7 @@
 var Botkit = require('../lib/Botkit.js');
 var express = require('express');
 var morgan = require('morgan');
+var bodyParser = require('body-parser');
 var app = express();
 
 app.use(morgan('dev'));
@@ -21,6 +22,7 @@ var bot = controller.spawn({});
 
 function handleFacebook (obj) {
   console.log('Got a message hook');
+  console.log(obj);
   if (obj.entry) {
     for (var e = 0; e < obj.entry.length; e++) {
       for (var m = 0; m < obj.entry[e].messaging.length; m++) {
