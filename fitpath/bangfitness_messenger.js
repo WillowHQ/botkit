@@ -21,7 +21,7 @@ var controller = Botkit.facebookbot({
 var bot = controller.spawn({});
 
 controller.setupWebserver(3000, function (err, webserver) {
-  controller.createWebhookEndpoints(http, bot, function () {
+  controller.createWebhookEndpoints(webserver, bot, function () {
     console.log('Bot online');
     console.log('Free stuff pl0x');
   });
