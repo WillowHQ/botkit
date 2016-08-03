@@ -66,6 +66,7 @@ function askWhatTimeWouldBeBest (convo) {
     convo.say('Ok, I\'ll ask someone from our team to get in contact via e-mail.');
     convo.next();
   });
+  convo.next();
 }
 
 function askForAnotherDay (convo) {
@@ -74,6 +75,7 @@ function askForAnotherDay (convo) {
     askWhatTimeWouldBeBest();
     convo.next();
   });
+  convo.next();
 }
 
 function askIfFreeTomorrow (convo) {
@@ -104,6 +106,7 @@ function askIfFreeTomorrow (convo) {
 
     convo.next();
   });
+  convo.next();
 }
 
 function askEveningsOrDaytimes (convo) {
@@ -128,6 +131,7 @@ function askEveningsOrDaytimes (convo) {
     askIfFreeTomorrow(convo);
     convo.next();
   });
+  convo.next();
 }
 
 function beginVisitingConversation(bot, message) {
