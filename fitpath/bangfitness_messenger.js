@@ -71,7 +71,6 @@ function askWhatTimeWouldBeBest (convo) {
 function askForAnotherDay (convo) {
   console.log('askForAnotherDay');
   convo.ask('What\'s another day that would work?', function (response, convo) {
-    console.log('Whats another day');
     askWhatTimeWouldBeBest();
     convo.next();
   });
@@ -97,8 +96,10 @@ function askIfFreeTomorrow (convo) {
   convo.ask(messageData, function (response, convo) {
     if (response.text == 'No') {
       askForAnotherDay(convo);
+      convo.next();
     } else {
       askWhatTimeWouldBeBest(convo);
+      convo.next();
     }
 
     convo.next();
