@@ -73,7 +73,6 @@ function askForAnotherDay (convo) {
   console.log('askForAnotherDay');
   convo.ask('What\'s another day that would work?', function (response, convo) {
     askWhatTimeWouldBeBest();
-    convo.next();
   });
   convo.next();
 }
