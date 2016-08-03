@@ -1,17 +1,4 @@
 var Botkit = require('../lib/Botkit.js');
-// var express = require('express');
-// var morgan = require('morgan');
-// var app = express();
-// var http;// = require('http').Server(app);
-//
-// app.use(morgan('dev'));
-
-// console.log(__dirname + '/bangfitnesspublic');
-// app.use('/', express.static(__dirname + '/bangfitnesspublic'));
-//
-// app.listen(3001, function () {
-//   console.log('App listening on port 3001');
-// });
 
 var controller = Botkit.facebookbot({
   access_token: 'EAAD0LsmI8VABAEcFZCXoCCZC6srqcInDD6c6eozD2XdZBu6DGu9slevF0bn91aLEiGW3tLZAJBfR2UKFMd8KSrGsxySOjZAK30T8gr34H9MoTbgCVMxLYYRJbPdKKbZBOxoezurLCnT6AJ8oQFz5ci5MASH2pAZBFhG5SHttkOleQZDZD',
@@ -23,7 +10,6 @@ var bot = controller.spawn({});
 controller.setupWebserver(3000, function (err, webserver) {
   controller.createWebhookEndpoints(webserver, bot, function () {
     console.log('Bot online');
-    console.log('Free stuff pl0x');
   });
 });
 
@@ -75,6 +61,7 @@ controller.on('facebook_optin', function (bot, message) {
 });
 
 function askWhatTimeWouldBeBest (convo) {
+  console.log('askWhatTimeWouldBeBest');
   convo.ask('What time would be best?', function (response, convo) {
     convo.say('Ok, I\'ll ask someone from our team to get in contact via e-mail.');
     convo.next();
@@ -82,6 +69,7 @@ function askWhatTimeWouldBeBest (convo) {
 }
 
 function askForAnotherDay (convo) {
+  console.log('askForAnotherDay');
   convo.ask('What\'s another day that would work?', function (response, convo) {
     askWhatTimeWouldBeBest();
     convo.next();
@@ -89,6 +77,7 @@ function askForAnotherDay (convo) {
 }
 
 function askIfFreeTomorrow (convo) {
+  console.log('askIfFreeTomorrow');
   messageData = {
     text: "Got it. Are you free tomorrow?",
     quick_replies: [
@@ -116,6 +105,7 @@ function askIfFreeTomorrow (convo) {
 }
 
 function askEveningsOrDaytimes (convo) {
+  console.log('askEveningsOrDaytimes');
   var messageData = {
     text: "I can definitely help you with that. Are evenings or daytimes better for you?",
     quick_replies: [
@@ -139,6 +129,7 @@ function askEveningsOrDaytimes (convo) {
 }
 
 function beginVisitingConversation(bot, message) {
+  console.log('beginVisitingConversation');
   bot.startConversation(message, function (err, convo) {
     askEveningsOrDaytimes(convo);
     convo.next();
@@ -146,6 +137,7 @@ function beginVisitingConversation(bot, message) {
 }
 
 controller.hears('Visiting BangFitness', 'message_received', function (bot, message) {
+  console.log('Visiting BangFitness');
   beginVisitingConversation(bot, message);
 });
 
