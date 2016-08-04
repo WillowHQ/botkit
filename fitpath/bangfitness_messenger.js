@@ -7,10 +7,15 @@ var controller = Botkit.facebookbot({
 
 var bot = controller.spawn({});
 
-controller.setupWebserver(3000, function (err, webserver) {
-  controller.createWebhookEndpoints(webserver, bot, function () {
-    console.log('Bot online');
+controller.setupWebserver(3000, function(err,webserver) {
+  controller.createWebhookEndpoints(controller.webserver, bot, function() {
+    console.log('This bot is online!!!');
   });
+});
+
+// user said hello
+controller.hears(['hello'], 'message_received', function(bot, message) {
+  bot.reply(message, 'Hey there.');
 });
 
 function sendGreeting (bot, message) {
@@ -147,108 +152,108 @@ controller.hears('Visiting BangFitness', 'message_received', function (bot, mess
 });
 
 controller.hears('About our approach', 'message_received', function (bot, message) {
-  // bot.startConversation(message, function (err, convo) {
-  //   messageData = {
-  //     text: "That would be our pleasure. Would you prefer a phone call or an e-mail?",
-  //     quick_replies: [
-  //       {
-  //         content_type: "text",
-  //         title: "Phone call",
-  //         payload: "PHONE_CALL"
-  //       },
-  //       {
-  //         content_type: "text",
-  //         title: "E-mail",
-  //         payload: "EMAIL"
-  //       }
-  //     ]
-  //   };
-  //   convo.ask(messageData, function (response, convo) {
-  //     if (response.text == 'Phone call') {
-  //       convo.ask('No problem. What\'s your number?', function (response, convo) {
-  //         convo.ask('What\'s a good time to call?', function (response, convo) {
-  //           convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
-  //         });
-  //       });
-  //     } else {
-  //       convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
-  //     }
-  //     convo.next();
-  //   });
-  //   convo.next();
-  // });
+   bot.startConversation(message, function (err, convo) {
+     messageData = {
+       text: "That would be our pleasure. Would you prefer a phone call or an e-mail?",
+       quick_replies: [
+         {
+           content_type: "text",
+           title: "Phone call",
+           payload: "PHONE_CALL"
+         },
+         {
+           content_type: "text",
+           title: "E-mail",
+           payload: "EMAIL"
+         }
+       ]
+     };
+     convo.ask(messageData, function (response, convo) {
+       if (response.text == 'Phone call') {
+         convo.ask('No problem. What\'s your number?', function (response, convo) {
+           convo.ask('What\'s a good time to call?', function (response, convo) {
+             convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+           });
+         });
+       } else {
+         convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+       }
+       convo.next();
+     });
+     convo.next();
+   });
 });
 
 controller.hears(['Technique advice', 'Training programs', 'Nutrition'], 'message_received', function (bot, message) {
-  // bot.startConversation(message, function (err, convo) {
-  //   convo.ask('That\'s one of our favourite things. What would you specifically like to learn about?', function (response, convo) {
-  //     messageData = {
-  //       text: "That would be our pleasure. Would you prefer a phone call or an e-mail?",
-  //       quick_replies: [
-  //         {
-  //           content_type: "text",
-  //           title: "Phone call",
-  //           payload: "PHONE_CALL"
-  //         },
-  //         {
-  //           content_type: "text",
-  //           title: "E-mail",
-  //           payload: "EMAIL"
-  //         }
-  //       ]
-  //     };
-  //     convo.ask(messageData, function (response, convo) {
-  //       if (response.text == 'Phone call') {
-  //         convo.ask('No problem. What\'s your number?', function (response, convo) {
-  //           convo.ask('What\'s a good time to call?', function (response, convo) {
-  //             convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
-  //             convo.next();
-  //           });
-  //           convo.next();
-  //         });
-  //       } else {
-  //         convo.say('Sounds great. I\'m a robot so I don\'t feel things but our team is looking forward to speaking with you!');
-  //       }
-  //       convo.next();
-  //     });
-  //     convo.next();
-  //   });
-  //   convo.next();
-  // });
+   bot.startConversation(message, function (err, convo) {
+     convo.ask('That\'s one of our favourite things. What would you specifically like to learn about?', function (response, convo) {
+       messageData = {
+         text: "That would be our pleasure. Would you prefer a phone call or an e-mail?",
+         quick_replies: [
+           {
+             content_type: "text",
+             title: "Phone call",
+             payload: "PHONE_CALL"
+           },
+           {
+             content_type: "text",
+             title: "E-mail",
+             payload: "EMAIL"
+           }
+         ]
+       };
+       convo.ask(messageData, function (response, convo) {
+         if (response.text == 'Phone call') {
+           convo.ask('No problem. What\'s your number?', function (response, convo) {
+             convo.ask('What\'s a good time to call?', function (response, convo) {
+               convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+               convo.next();
+             });
+             convo.next();
+           });
+         } else {
+           convo.say('Sounds great. I\'m a robot so I don\'t feel things but our team is looking forward to speaking with you!');
+         }
+         convo.next();
+       });
+       convo.next();
+     });
+     convo.next();
+   });
 });
 
 controller.hears('Something else', 'message_received', function (bot, message) {
-  // bot.startConversation(message, function (err, convo) {
-  //     messageData = {
-  //       text: "I\'ll ask on of our team members to get in touch with you. Would you prefer a phone call or an e-mail?",
-  //       quick_replies: [
-  //         {
-  //           content_type: "text",
-  //           title: "Phone call",
-  //           payload: "PHONE_CALL"
-  //         },
-  //         {
-  //           content_type: "text",
-  //           title: "E-mail",
-  //           payload: "EMAIL"
-  //         }
-  //       ]
-  //     };
-  //     convo.ask(messageData, function (response, convo) {
-  //       if (response.text == 'Phone call') {
-  //         convo.ask('No problem. What\'s your number?', function (response, convo) {
-  //           convo.ask('What\'s a good time to call?', function (response, convo) {
-  //             convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
-  //             convo.next();
-  //           });
-  //           convo.next();
-  //         });
-  //       } else {
-  //         convo.say('Sounds great. I\'m a robot so I don\'t feel things but our team is looking forward to speaking with you!');
-  //         convo.next();
-  //       }
-  //       convo.next();
-  //     });
-  //   convo.next();
-  // });
+   bot.startConversation(message, function (err, convo) {
+       messageData = {
+         text: "I\'ll ask on of our team members to get in touch with you. Would you prefer a phone call or an e-mail?",
+         quick_replies: [
+           {
+             content_type: "text",
+             title: "Phone call",
+             payload: "PHONE_CALL"
+           },
+           {
+             content_type: "text",
+             title: "E-mail",
+             payload: "EMAIL"
+           }
+         ]
+       };
+       convo.ask(messageData, function (response, convo) {
+         if (response.text == 'Phone call') {
+           convo.ask('No problem. What\'s your number?', function (response, convo) {
+             convo.ask('What\'s a good time to call?', function (response, convo) {
+               convo.say('Sounds great. I\'m a robot so I don\'t feel feelings but our team is looking forward to speaking with you!');
+               convo.next();
+             });
+             convo.next();
+           });
+         } else {
+           convo.say('Sounds great. I\'m a robot so I don\'t feel things but our team is looking forward to speaking with you!');
+           convo.next();
+         }
+         convo.next();
+       });
+     convo.next();
+   });
 });
