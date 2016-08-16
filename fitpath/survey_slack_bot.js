@@ -1,4 +1,3 @@
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           ______     ______     ______   __  __     __     ______
           /\  == \   /\  __ \   /\__  _\ /\ \/ /    /\ \   /\__  _\
@@ -75,75 +74,9 @@ var controller = Botkit.slackbot({
 });
 
 var bot = controller.spawn({
-  token: 'xoxb-29530029556-OmwcgKzhVDUHSa4x85eRRpba',
+  token: 'xoxb-69491102357-fsuHZ6QO1p0LSwfuCMb9P6xc',
   json_file_store: '../db/',
 }).startRTM()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-controller.hears(['survey'], ['direct_message'], function(bot, message){
-  console.log("yes! Survey");
-
-  chuckConverstion(bot, message)
-
-})
-
-
-var chuckConverstion = function(bot, message){
-  console.log("chuck question");
-  console.log("ask1");
-  bot.startConversation(message, function(err, convo){
-    convo.ask("How do you fell you did last week?", function(response,convo){
-      console.log("ask1 in");
-      chuckAsk2(response, convo);
-      convo.next();
-
-    })
-  })
-}
-
-var chuckAsk2 = function(response, convo){
-  console.log("Ask2");
-  convo.ask("What is something you are proud of?", function(response, convo){
-    console.log("ask2 in");
-    chuckAsk3(response, convo);
-    convo.next();
-  })
-
-}
-var chuckAsk3 = function(response, convo){
-  console.log("ask3");
-  console.log("change");
-  convo.ask("Is there anything your not happy with, that we can improve on?", function (response, convo){
-    console.log('ask3 in');
-
-    //send a post to db for info
-    console.log('Entering building reminder');
-    question1(response, convo);
-    convo.next();
-
-
-  })
-
-
-}
-
-
 
 
 
@@ -156,6 +89,40 @@ controller.hears(['reminder'],['direct_message'],function(bot,message) {
   reminderConverstion(bot, message);
 
 });
+
+
+controller.hears(['workout'], ['direct_message'], function(bot, message){
+  console.log("Yes!");
+  console.log("workout");
+  workoutConverstion(bot, message);
+
+})
+
+controller.hears(['path'], ['direct_message'], function(bot, message){
+  console.log("path");
+  console.log("");
+  pathConverstion(bot, message);
+
+})
+
+
+var pathConverstion = function (bot, message) {
+  console.log("pathConverstion");
+  console.log(message);
+  console.log(bot);
+  request('http://localhost:12557/api/user/slackId/' + message.user, function (error, response, body) {
+    console.log("hjeu");
+    console.log(response);
+    console.log(error);
+  });
+  //request('http:' + config.serverIp + ':12557//api/assignment/selectedUser/list/')
+
+
+}
+
+
+
+
 
 
 
@@ -197,41 +164,10 @@ var reminderConverstion = function(bot, message){
   });
 };
 
-var options = function (response, convo) {
-  console.log("options");
-  convo.ask("Would you like to make a reminder?",
-
-  [
-    {
-      pattern: bot.utterances.yes, //stuck on yes
-      callback: function(response, convo){
-        convo.say("Great! I will continue...");
-        question1(response, convo);
-        convo.next();
-      }
-    },
-    {
-      pattern: bot.utterances.no,
-      callback: function(response, convo){
-        convo.say('Have a good day!');
-        convo.next();
-      }
-    },
-    {
-      default: true,
-      callback: function(response, convo){
-        convo.say("Yes or No")
-        convo.repeat();
-        convo.next();
-      }
-    }
-
-  ]
-  )
-}
 
 var question1 = function(response, convo){
   console.log("ask1");
+
   convo.ask("What do you want your reminder to say?", function(response, convo){
     convo.say("Awesome");
     question2(response, convo);
@@ -469,10 +405,10 @@ var sendOutReminder = function(res, convo, response){
   // };
 
 
-  var reminder = {
-    title: res.body,
-
-  }
+  // var reminder = {
+  //   title: res.body,
+  //
+  // }
 
 
 
@@ -504,20 +440,56 @@ module.exports.receiveConvo = function(convo){
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
+      if(convo.convoObject.questions.length > 1){
 
-      convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
+        convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
-        convo.say("Awesome.");
-        console.log("ask2 start here");
-        console.log(convo);
+          convo.say("Awesome.");
+          console.log("ask2 start here");
+          console.log(convo);
 
-        //breaking with 2 different surveys at the same time
-        convo.next();
-        console.log("after next");
+          //breaking with 2 different surveys at the same time
+          convo.next();
+          console.log("after next");
 
-        ask2(response, convo);
+          ask2(response, convo);
 
-      });
+        });
+      }
+      else if(convo.convoObject.questions[0] && convo.convoObject.type === 'reminder'){
+
+        convo.ask(convo.convoObject.questions[0].question,
+
+          [
+            {
+              pattern: bot.utterances.yes, //stuck on yes
+              callback: function(response, convo){
+                convo.say("Great work, keep it up! Reporting your progress to FitPath asap! :)");
+                closeSurvey(response,convo);
+                convo.next();
+              }
+            },
+            {
+              pattern: bot.utterances.no,
+              callback: function(response, convo){
+                convo.say('You’ll get em next time!');
+                closeSurvey(response,convo);
+                convo.next();
+              }
+            },
+            {
+              default: true,
+              callback: function (response, convo) {
+                convo.say("I’m a bot so I don’t know what you just said, but I’ll go ask a human and they will follow up!");
+                closeSurvey(response,convo);
+                convo.next();
+              }
+
+            }
+
+          ]
+          )
+      }
 
     }else{
       convo.say("Bye");
