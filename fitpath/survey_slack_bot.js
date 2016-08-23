@@ -80,6 +80,11 @@ var bot = controller.spawn({
 }).startRTM()
 
 
+controller.hears(['test'], ['direct_message'], function(bot, message){
+    //start a convo with the test bot
+
+})
+
 
 
 
