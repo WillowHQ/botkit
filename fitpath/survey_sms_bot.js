@@ -71,7 +71,8 @@ var convoObject =
 var controller = Botkit.twiliosmsbot({
   account_sid: 'ACf83693e222a7ade08080159c4871c9e3',
   auth_token: '20b36bd42a33cd249e0079a6a1e8e0dd',
-  twilio_number: config.phoneNumber
+  twilio_number: config.phoneNumber,
+  server_url: config.server_url
 });
 
 var bot = controller.spawn({});
@@ -102,11 +103,11 @@ module.exports.receiveConvo = function(convo){
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
-      convo.say("Awesome.");
+      //convo.say("Awesome.");
       console.log(convo.convoObject.questions[0].question);
       convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
-        convo.say("Ok, thank you.");
+        //convo.say("Ok, thank you.");
         console.log("ask2 start here");
         console.log(convo);
 
@@ -132,7 +133,7 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[1].question, function(response, convo) {
 
-        convo.say("Ok");
+        //convo.say("Ok");
         ask3(response, convo);
         convo.next();
       });
@@ -152,7 +153,7 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[2].question, function(response, convo) {
 
-        convo.say("Ok.");
+        //convo.say("Ok.");
         ask4(response, convo);
         convo.next();
       });
@@ -171,7 +172,7 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[3].question, function(response, convo) {
 
-        convo.say("Ok.");
+        //convo.say("Ok.");
         ask5(response, convo);
         convo.next();
       });
@@ -190,7 +191,7 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[4].question, function(response, convo) {
 
-        convo.say("Awesome.");
+        //convo.say("Awesome.");
         convo.say("Bye");
         closeSurvey(response,convo);
         convo.next();

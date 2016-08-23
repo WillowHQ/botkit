@@ -5,11 +5,11 @@ var Botkit = require('../lib/Botkit.js');
 var serverIp = require('./env.js').serverIp;
 var _ = require('underscore');
 var request = require('request');
-var raven = require('raven');
-var client = new raven.Client('https://f755c390bd98419eb0ef404e519d8e4a:f3b90e92e81d42108d066106353e23d6@app.getsentry.com/88385');
-
-client.patchGlobal();
-
+// var raven = require('raven');
+// var client = new raven.Client('https://f755c390bd98419eb0ef404e519d8e4a:f3b90e92e81d42108d066106353e23d6@app.getsentry.com/88385');
+//
+// client.patchGlobal();
+//
 //var Promise = require('promise');
 
 
@@ -19,8 +19,10 @@ client.patchGlobal();
 
 var bots = {
   slack: require('./survey_slack_bot.js'),
-  sms: require('./survey_sms_bot.js'),
-  fb: require('./survey_messenger_bot.js')
+  sms: require('./survey_sms_bot.js')
+
+    //removing fb bot for now
+  //fb: require('./survey_messenger_bot.js')
 };
 
 
@@ -30,8 +32,7 @@ var bots = {
 var exports = module.exports = {};
 
 
-
-
+r6
 var controller = Botkit.slackbot({
     debug: true
 });
@@ -75,6 +76,8 @@ function init() {
   //dispatchConvo();
 
   //make sure it starts on the minmute
+
+
 
   var d = new Date();
 
