@@ -2,6 +2,17 @@
 //
 
 var Botkit = require('../lib/Botkit.js');
+
+//Thom is adding in dotenv so everything on this process will have access to the env variables
+var express = require('express');
+var app = express();
+
+
+
+
+
+
+require('dotenv').config();
 var serverIp = require('./env.js').serverIp;
 var _ = require('underscore');
 var request = require('request');
@@ -30,74 +41,52 @@ var bots = {
 
 */
 
-if (!process.env.clientId || !process.env.clientSecret || !process.env.port) {
-    console.log('Error: Specify clientId clientSecret and port in environment');
-    process.exit(1);
-}
-
-var controller = Botkit.slackbot({
-    json_file_store: './db_slackbutton_incomingwebhook/',
-}).configureSlackApp(
-    {
-        clientId: process.env.clientId,
-        clientSecret: process.env.clientSecret,
-        scopes: ['incoming-webhook'],
-    }
-);
+app.get('/test', function(req, res){
+    res.send('hello world');
 
 
-controller.setupWebserver(process.env.port,function(err,webserver) {
-
-
-    webserver.get('/',function(req,res) {
-
-        var html = '<h1>Super Insecure Form</h1><p>Put text below and hit send - it will be sent to every team who has added your integration.</p><form method="post" action="/unsafe_endpoint"><input type="text" name="text" /><input type="submit"/></form>';
-        res.send(html);
-
-    });
-
-    // This is a completely insecure form which would enable
-    // anyone on the internet who found your node app to
-    // broadcast to all teams who have added your integration.
-    // it is included for demonstration purposes only!!!
-    webserver.post('/unsafe_endpoint',function(req,res) {
-        var text = req.body.text;
-        text = text.trim();
-
-        controller.storage.teams.all(function(err,teams) {
-            var count = 0;
-            for (var t in teams) {
-                if (teams[t].incoming_webhook) {
-                    count++;
-                    controller.spawn(teams[t]).sendWebhook({
-                        text: text
-                    },function(err) {
-                        if(err) {
-                            console.log(err);
-                        }
-                    });
-                }
-            }
-
-            res.send('Message sent to ' + count + ' teams!');
-        });
-    });
-
-    controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
-        if (err) {
-            res.status(500).send('ERROR: ' + err);
-        } else {
-            res.send('Success!');
-        }
-    });
 });
+app.post('/survey', function (req, res) {
+    //take in a survey that looks exactly like what comes back from a convo now and return a survey response
+
+    //ok so what does a convo object look like oh wait we don't care
+
+    console.log(JSON.parse(body));  // just print out evertything we get back from this api call
+
+    console.log("test method called line 55");
+
+    //incoming convo will be for slack bot 'U24WU4SD' or a new twilio number
+
+    res.send(dispatchConvo(JSON.parse(body)));
+
+    //TODO in the event this is a test case we should be ab
+
+    //now I need to program the test bot to take part in this survey
+
+    //After newman calls this we either return with the respone or we cehck that it was stored on the backend somehow
+
+    //might need to set a time out variable for newman to a few seconds to let this happen
+
+    //actually ya - wait for this to come back as a 200 - then take the survey or assignment id and use it to get the resposne
+    //as the next test
+
+    //we can do this for both surveys and reminders, and sms and slack
+    //
 
 
-controller.on('create_incoming_webhook',function(bot,webhook_config) {
-    bot.sendWebhook({
-        text: ':thumbsup: Incoming webhook successfully configured'
-    });
+
+
+    //for both sms and slack
+
+    //then i need to do something here - so that newman gets told this worked
+
+
+
+
 })
+
+app.listen(3000);
+
 
 
 /**
@@ -134,6 +123,8 @@ init(); //kick things off
 /* the backend every minute if there are any assignments
 
 */
+
+
 
 init();
 
