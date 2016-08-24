@@ -67,6 +67,7 @@ var _ = require('underscore');
 //console.log(config.phoneNumber);
 
 // josh U1YL1NY7Q
+//thom U1YL92FJR
 //var convoObject;
 var controller = Botkit.slackbot({
     json_file_store: '../db/',
@@ -120,7 +121,7 @@ var pathConversation = function (bot, message) {
 
       console.log('help');
       console.log("here");
-      request('http://localhost:12557/api/assignment/reminder/selectedUser/list/' + crap._id, function (error, response1, body) {
+      request('http://localhost:12557/api/assignment/path/selectedUser/list/' + crap._id, function (error, response1, body) {
         console.log("in");
         if(error){
           console.log(error);
@@ -154,7 +155,10 @@ var pathStart = function (crap2, bot, message, crap) {
     console.log(assignment.index);
     var log = {
       num: counter++,
-      text: assignment.reminderId.title
+      text: assignment.reminderId.title,
+      year: assignment.year,
+      month: assignment.month,
+      date: assignment.date
 
 
     }
@@ -167,57 +171,35 @@ var pathStart = function (crap2, bot, message, crap) {
   bot.startConversation(message, function (err, convo) {
     console.log("here");
     var output = "";
+    // string.time.getFullYear() + '/' +  string.time.getMonth()  + '/' + string.time.getDate() +
     assignmentLayout.forEach(function(string){
-      output = output + "\n" + string.num + "\t" + string.text;
+      output = output + "\n" + string.num + "\t" + string.year + '/' +  string.month  + '/' + string.date +  '\t' + string.text;
       console.log(output);
     })
     console.log(output);
+    convo.ask("Hey " + crap.fullName + "! \n Here are the your reminders. \n" + output, arrayCreate(assignmentLayout));
+  });
 
+};
+var arrayCreate = function (assignmentLayout){
 
-    convo.ask("Hey " + crap.fullName + "! \n Here are the your reminders. \n" + output, arrayCreate(assignmentLayout, output)
-    [
+  var arr = [];
+  assignmentLayout.forEach(function (text) {
 
-      {
-        pattern: bot.utterances.yes, //stuck on yes
+      var pat = {
+        pattern: text.num.toString(),
         callback: function(response, convo){
-          convo.say("Great! I will continue...");
-          question1(response, convo);
-          convo.next();
-        }
-      },
-      {
-        pattern: bot.utterances.no,
-        callback: function(response, convo){
-          convo.say('Have a good day!');
-          convo.next();
-        }
-      },
-      {
-        default: true,
-        callback: function(response, convo){
-          convo.say("Yes or No")
-          convo.repeat();
+          convo.say("Done " + text.num);
           convo.next();
         }
       }
-
-    ]
-    )
-
-
+      arr.push(pat)
   })
+  console.log(arr);
+  return arr;
 
 
 }
-
-var arrayCreate = function (assignmentLayout, output){
-
-
-
-
-}
-
-
 
 
 
