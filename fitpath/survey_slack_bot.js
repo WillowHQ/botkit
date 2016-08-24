@@ -1,4 +1,3 @@
-
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
           ______     ______     ______   __  __     __     ______
           /\  == \   /\  __ \   /\__  _\ /\ \/ /    /\ \   /\__  _\
@@ -67,7 +66,7 @@ var _ = require('underscore');
 
 //console.log(config.phoneNumber);
 
-
+// josh U1YL1NY7Q
 //var convoObject;
 var controller = Botkit.slackbot({
     json_file_store: '../db/',
@@ -75,75 +74,9 @@ var controller = Botkit.slackbot({
 });
 
 var bot = controller.spawn({
-  token: 'xoxb-29530029556-OmwcgKzhVDUHSa4x85eRRpba',
+  token: 'xoxb-69491102357-fsuHZ6QO1p0LSwfuCMb9P6xc',
   json_file_store: '../db/',
 }).startRTM()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-controller.hears(['survey'], ['direct_message'], function(bot, message){
-  console.log("yes! Survey");
-
-  chuckConverstion(bot, message)
-
-})
-
-
-var chuckConverstion = function(bot, message){
-  console.log("chuck question");
-  console.log("ask1");
-  bot.startConversation(message, function(err, convo){
-    convo.ask("How do you fell you did last week?", function(response,convo){
-      console.log("ask1 in");
-      chuckAsk2(response, convo);
-      convo.next();
-
-    })
-  })
-}
-
-var chuckAsk2 = function(response, convo){
-  console.log("Ask2");
-  convo.ask("What is something you are proud of?", function(response, convo){
-    console.log("ask2 in");
-    chuckAsk3(response, convo);
-    convo.next();
-  })
-
-}
-var chuckAsk3 = function(response, convo){
-  console.log("ask3");
-  console.log("change");
-  convo.ask("Is there anything your not happy with, that we can improve on?", function (response, convo){
-    console.log('ask3 in');
-
-    //send a post to db for info
-    console.log('Entering building reminder');
-    question1(response, convo);
-    convo.next();
-
-
-  })
-
-
-}
-
-
 
 
 
@@ -153,14 +86,142 @@ controller.hears(['reminder'],['direct_message'],function(bot,message) {
 
   console.log(bot.botkit.storage.users);
   console.log(message);
-  reminderConverstion(bot, message);
+  reminderConversation(bot, message);
 
 });
 
 
+controller.hears(['workout'], ['direct_message'], function(bot, message){
+  console.log("Yes!");
+  console.log("workout");
+  workoutConversation(bot, message);
+
+})
+
+controller.hears(['path'], ['direct_message'], function(bot, message){
+  console.log("path");
+  console.log("");
+  console.log(message.user);
+  pathConversation(bot, message);
+
+})
 
 
-var reminderConverstion = function(bot, message){
+var pathConversation = function (bot, message) {
+  console.log("pathconversation");
+
+  request('http://localhost:12557/api/user/slackId/' + message.user, function (error, response, body) {
+    if(error){
+      console.log(error);
+    }
+    else{
+      console.log("hjeu");
+      var crap = JSON.parse(response.body)
+
+      console.log('help');
+      console.log("here");
+      request('http://localhost:12557/api/assignment/reminder/selectedUser/list/' + crap._id, function (error, response1, body) {
+        console.log("in");
+        if(error){
+          console.log(error);
+        }
+        else{
+          console.log(response1);
+          var crap2 = JSON.parse(response1.body);
+
+
+          pathStart(crap2, bot, message, crap);
+
+
+
+        }
+      });
+    }
+
+
+  });
+  //request('http:' + config.serverIp + ':12557//api/assignment/selectedUser/list/')
+
+
+}
+
+var pathStart = function (crap2, bot, message, crap) {
+
+  var assignmentLayout = [];
+  var counter = 0;
+  crap2.forEach(function(assignment){
+    console.log(assignment);
+    console.log(assignment.index);
+    var log = {
+      num: counter++,
+      text: assignment.reminderId.title
+
+
+    }
+    assignmentLayout.push(log);
+
+  })
+  console.log(assignmentLayout);
+
+
+  bot.startConversation(message, function (err, convo) {
+    console.log("here");
+    var output = "";
+    assignmentLayout.forEach(function(string){
+      output = output + "\n" + string.num + "\t" + string.text;
+      console.log(output);
+    })
+    console.log(output);
+
+
+    convo.ask("Hey " + crap.fullName + "! \n Here are the your reminders. \n" + output, arrayCreate(assignmentLayout, output)
+    [
+
+      {
+        pattern: bot.utterances.yes, //stuck on yes
+        callback: function(response, convo){
+          convo.say("Great! I will continue...");
+          question1(response, convo);
+          convo.next();
+        }
+      },
+      {
+        pattern: bot.utterances.no,
+        callback: function(response, convo){
+          convo.say('Have a good day!');
+          convo.next();
+        }
+      },
+      {
+        default: true,
+        callback: function(response, convo){
+          convo.say("Yes or No")
+          convo.repeat();
+          convo.next();
+        }
+      }
+
+    ]
+    )
+
+
+  })
+
+
+}
+
+var arrayCreate = function (assignmentLayout, output){
+
+
+
+
+}
+
+
+
+
+
+var reminderConversation = function(bot, message){
   bot.startConversation(message, function(err, convo){
     console.log('here');
     convo.say("Josh is the best!")
@@ -197,41 +258,10 @@ var reminderConverstion = function(bot, message){
   });
 };
 
-var options = function (response, convo) {
-  console.log("options");
-  convo.ask("Would you like to make a reminder?",
-
-  [
-    {
-      pattern: bot.utterances.yes, //stuck on yes
-      callback: function(response, convo){
-        convo.say("Great! I will continue...");
-        question1(response, convo);
-        convo.next();
-      }
-    },
-    {
-      pattern: bot.utterances.no,
-      callback: function(response, convo){
-        convo.say('Have a good day!');
-        convo.next();
-      }
-    },
-    {
-      default: true,
-      callback: function(response, convo){
-        convo.say("Yes or No")
-        convo.repeat();
-        convo.next();
-      }
-    }
-
-  ]
-  )
-}
 
 var question1 = function(response, convo){
   console.log("ask1");
+
   convo.ask("What do you want your reminder to say?", function(response, convo){
     convo.say("Awesome");
     question2(response, convo);
@@ -469,10 +499,10 @@ var sendOutReminder = function(res, convo, response){
   // };
 
 
-  var reminder = {
-    title: res.body,
-
-  }
+  // var reminder = {
+  //   title: res.body,
+  //
+  // }
 
 
 
@@ -504,20 +534,73 @@ module.exports.receiveConvo = function(convo){
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
+      console.log(convo.convoObject.questions.length);
+      if(convo.convoObject.questions.length > 1){
+        console.log('in 1');
+        convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
-      convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
+          convo.say("Awesome.");
+          console.log("ask2 start here");
+          console.log(convo);
 
-        convo.say("Awesome.");
-        console.log("ask2 start here");
-        console.log(convo);
+          //breaking with 2 different surveys at the same time
+          convo.next();
+          console.log("after next");
 
-        //breaking with 2 different surveys at the same time
-        convo.next();
-        console.log("after next");
+          ask2(response, convo);
 
-        ask2(response, convo);
+        });
+      }
+      else if(convo.convoObject.questions[0] && convo.convoObject.type === 'reminder'){
 
-      });
+        convo.ask(convo.convoObject.questions[0].question,
+
+          [
+            {
+              pattern: bot.utterances.yes, //stuck on yes
+              callback: function(response, convo){
+                convo.say("Great work, keep it up! Reporting your progress to FitPath asap! :)");
+                closeSurvey(response,convo);
+                convo.next();
+              }
+            },
+            {
+              pattern: bot.utterances.no,
+              callback: function(response, convo){
+                convo.say('You’ll get em next time!');
+                closeSurvey(response,convo);
+                convo.next();
+              }
+            },
+            {
+              default: true,
+              callback: function (response, convo) {
+                convo.say("I’m a bot so I don’t know what you just said, but I’ll go ask a human and they will follow up!");
+                closeSurvey(response,convo);
+                convo.next();
+              }
+
+            }
+
+          ]
+          )
+      }
+      else if(convo.convoObject.questions[0] && convo.convoObject.type === 'survey'){
+        console.log('in 1');
+        convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
+
+          convo.say("Awesome.");
+          console.log("ask2 start here");
+          console.log(convo);
+
+          //breaking with 2 different surveys at the same time
+          convo.next();
+          console.log("after next");
+
+          ask2(response, convo);
+
+        });
+      }
 
     }else{
       convo.say("Bye");
