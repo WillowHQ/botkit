@@ -160,8 +160,6 @@ var pathStart = function (assignments, bot, message, user) {
       year: assignment.year,
       month: assignment.month,
       date: assignment.date
-
-
     }
     assignmentLayout.push(log);
 
@@ -177,13 +175,11 @@ var pathStart = function (assignments, bot, message, user) {
       console.log(string.info.specificDate);
       var date = new Date(string.info.specificDate);
 
-
-
       output = output + "\n" + string.num + "\t" +  date +  '\t' + string.text + '\t completed: ' + string.info.completed;
       console.log(output);
     })
     console.log(output);
-    convo.ask("Hey " + user.fullName + "! \n Here are the your reminders. \n Enter a number to complete that task. \n Enter q to finish." + output, arrayCreate(assignmentLayout, user));
+    convo.ask("Hey " + user.fullName + "! \n Here are the your reminders. \n Enter a number to complete that task and your response. \n Enter q to finish." + output, arrayCreate(assignmentLayout, user));
   });
 
 };
@@ -196,18 +192,19 @@ var arrayCreate = function (assignmentLayout, user){
         pattern: text.num.toString(),
         callback: function(response, convo){
           convo.say("Done " + text.num);
-          completedByNum(text);
+          completedByNum(text, response, convo);
           convo.repeat();
           convo.next();
-        }
+        },
+        key: 'response'
       }
-      arr.push(pat)
+      arr.push(pat);
   })
   var pat = {
     pattern: new RegExp(/^(q|Q)/i),
     callback: function (response, convo) {
       convo.say("Have a good day!");
-      updatedList(response, convo, user)
+      updatedList(user)
       convo.next();
     }
   }
@@ -229,6 +226,10 @@ var arrayCreate = function (assignmentLayout, user){
 
 var updatedList = function (response, convo, user) {
   console.log(user.id);
+
+
+
+
   request('http://localhost:12557/api/assignment/path/selectedUser/list/' + user.id , function (error, response1, body) {
     console.log("in");
     if(error){
@@ -252,8 +253,6 @@ var updatedList = function (response, convo, user) {
           year: assignment.year,
           month: assignment.month,
           date: assignment.date
-
-
         }
         assignmentLayout.push(log);
 
@@ -297,10 +296,13 @@ var endPath = function (response, convo) {
 
 
 
-var completedByNum = function (text) {
+var completedByNum = function (text, response, convo) {
   console.log(text.info);
+  var res = convo.extractResponses('response');
+  console.log('res');
+  console.log(res);
 
-
+  // request({url: 'http://localhost:12557/api/response/create' + })
 
   request({url: 'http://localhost:12557/api/assignment/completed/update/'+  text.info._id, method:"PUT"}, function(err, response){
     console.log("sweet 2");
