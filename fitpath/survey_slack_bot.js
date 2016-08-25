@@ -117,21 +117,21 @@ var pathConversation = function (bot, message) {
     }
     else{
       console.log("hjeu");
-      var crap = JSON.parse(response.body)
+      var user = JSON.parse(response.body)
 
       console.log('help');
       console.log("here");
-      request('http://localhost:12557/api/assignment/path/selectedUser/list/' + crap._id, function (error, response1, body) {
+      request('http://localhost:12557/api/assignment/path/selectedUser/list/' + user._id, function (error, response1, body) {
         console.log("in");
         if(error){
           console.log(error);
         }
         else{
           console.log(response1);
-          var crap2 = JSON.parse(response1.body);
+          var assignments = JSON.parse(response1.body);
 
 
-          pathStart(crap2, bot, message, crap);
+          pathStart(assignments, bot, message, user);
 
 
 
@@ -146,15 +146,16 @@ var pathConversation = function (bot, message) {
 
 }
 
-var pathStart = function (crap2, bot, message, crap) {
+var pathStart = function (assignments, bot, message, user) {
 
   var assignmentLayout = [];
   var counter = 0;
-  crap2.forEach(function(assignment){
+  assignments.forEach(function(assignment){
     console.log(assignment);
     console.log(assignment.index);
     var log = {
       num: counter++,
+      info: assignment,
       text: assignment.reminderId.title,
       year: assignment.year,
       month: assignment.month,
@@ -173,15 +174,20 @@ var pathStart = function (crap2, bot, message, crap) {
     var output = "";
     // string.time.getFullYear() + '/' +  string.time.getMonth()  + '/' + string.time.getDate() +
     assignmentLayout.forEach(function(string){
-      output = output + "\n" + string.num + "\t" + string.year + '/' +  string.month  + '/' + string.date +  '\t' + string.text;
+      console.log(string.info.specificDate);
+      var date = new Date(string.info.specificDate);
+
+
+
+      output = output + "\n" + string.num + "\t" +  date +  '\t' + string.text + '\t completed: ' + string.info.completed;
       console.log(output);
     })
     console.log(output);
-    convo.ask("Hey " + crap.fullName + "! \n Here are the your reminders. \n" + output, arrayCreate(assignmentLayout));
+    convo.ask("Hey " + user.fullName + "! \n Here are the your reminders. \n Enter a number to complete that task. \n Enter q to finish." + output, arrayCreate(assignmentLayout, user));
   });
 
 };
-var arrayCreate = function (assignmentLayout){
+var arrayCreate = function (assignmentLayout, user){
 
   var arr = [];
   assignmentLayout.forEach(function (text) {
@@ -190,17 +196,125 @@ var arrayCreate = function (assignmentLayout){
         pattern: text.num.toString(),
         callback: function(response, convo){
           convo.say("Done " + text.num);
+          completedByNum(text);
+          convo.repeat();
           convo.next();
         }
       }
       arr.push(pat)
   })
+  var pat = {
+    pattern: new RegExp(/^(q|Q)/i),
+    callback: function (response, convo) {
+      convo.say("Have a good day!");
+      updatedList(response, convo, user)
+      convo.next();
+    }
+  }
+  arr.push(pat)
+  var d = {
+    default: true,
+    callback: function (response, convo) {
+      convo.say("What was that? \n Commands are q or the numbers in the list.")
+      convo.repeat();
+      convo.next();
+    }
+  }
+  arr.push(d);
   console.log(arr);
   return arr;
 
 
 }
 
+var updatedList = function (response, convo, user) {
+  console.log(user.id);
+  request('http://localhost:12557/api/assignment/path/selectedUser/list/' + user.id , function (error, response1, body) {
+    console.log("in");
+    if(error){
+      console.log('error');
+      console.log(error);
+    }
+    else{
+      console.log(response1.body);
+      var assignments = JSON.parse(response1.body);
+      var output = "";
+
+      var assignmentLayout = [];
+      var counter = 0;
+      assignments.forEach(function(assignment){
+        console.log(assignment);
+        console.log(assignment.index);
+        var log = {
+          num: counter++,
+          info: assignment,
+          text: assignment.reminderId.title,
+          year: assignment.year,
+          month: assignment.month,
+          date: assignment.date
+
+
+        }
+        assignmentLayout.push(log);
+
+      })
+      console.log(assignmentLayout);
+
+      assignmentLayout.forEach(function (string) {
+        var date = new Date(string.info.specificDate);
+
+
+
+        output = output + "\n" + string.num + "\t" +  date +  '\t' + string.text + '\t completed: ' + string.info.completed;
+        console.log(output);
+
+      })
+      convo.say("Updated List \n" + output);
+      endPath(response, convo);
+      convo.next();
+    }
+  });
+
+
+}
+
+var endPath = function (response, convo) {
+  convo.on('end',function(convo) {
+
+    if (convo.status=='completed') {
+      // do something useful with the users responses
+      console.log("done");
+
+    }
+    else{
+      console.log('err');
+
+    }
+  });
+
+}
+
+
+
+
+var completedByNum = function (text) {
+  console.log(text.info);
+
+
+
+  request({url: 'http://localhost:12557/api/assignment/completed/update/'+  text.info._id, method:"PUT"}, function(err, response){
+    console.log("sweet 2");
+    if(err){
+      console.log("error");
+      console.log(err);
+    }
+    else{
+      console.log('response');
+      console.log(response.statusCode);
+    }
+  });
+
+}
 
 
 var reminderConversation = function(bot, message){
