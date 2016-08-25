@@ -5,12 +5,11 @@ var Botkit = require('../lib/Botkit.js');
 
 //Thom is adding in dotenv so everything on this process will have access to the env variables
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
 
-
-
-
-
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
 require('dotenv').config();
 var serverIp = require('./env.js').serverIp;
@@ -49,22 +48,39 @@ app.get('/test', function(req, res){
 app.post('/survey', function (req, res) {
     //take in a survey that looks exactly like what comes back from a convo now and return a survey response
 
-    //ok so what does a convo object look like oh wait we don't care
-
-    console.log(JSON.parse(body));  // just print out evertything we get back from this api call
-
-    console.log("test method called line 55");
-
     //incoming convo will be for slack bot 'U24WU4SD' or a new twilio number
 
-    res.send(dispatchConvo(JSON.parse(body)));
+    dispatchConvo(req.body);
 
     //TODO in the event this is a test case we should be ab
 
     //now I need to program the test bot to take part in this survey
 
-    //After newman calls this we either return with the respone or we cehck that it was stored on the backend somehow
+    // The test bot is going to respond 'Yes' to everything that gets sent to it
+    var controller = Botkit.slackbot({
+      debug: false
+    });
 
+    controller.spawn({
+      token: 'xoxb-72931516352-1viFVPkCtdFz7AZeSOAgmXDW'
+    }).startRTM();
+
+    // Keep track of the questions that were asked
+    var questions = [];
+
+    controller.hears('.*', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+      // Prevent the test bot from responding to itself
+      if (message.text !== 'Yes') {
+        questions.push(message.text);
+        console.log(questions);
+        bot.reply(message, 'Yes');
+        if (questions.length == 4) {
+          res.json(questions);
+        }
+      }
+    });
+
+    // The test conversation should consist of three questions and one 'Bye'
     //might need to set a time out variable for newman to a few seconds to let this happen
 
     //actually ya - wait for this to come back as a 200 - then take the survey or assignment id and use it to get the resposne
@@ -73,17 +89,12 @@ app.post('/survey', function (req, res) {
     //we can do this for both surveys and reminders, and sms and slack
     //
 
-
-
-
     //for both sms and slack
 
     //then i need to do something here - so that newman gets told this worked
 
-
-
-
-})
+    // Let's just pretend that the test passed for now
+});
 
 app.listen(3000);
 

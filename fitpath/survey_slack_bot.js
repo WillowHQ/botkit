@@ -75,14 +75,13 @@ var controller = Botkit.slackbot({
 });
 
 var bot = controller.spawn({
-  token: 'xoxb-29530029556-OmwcgKzhVDUHSa4x85eRRpba',
+  token: 'xoxb-72951629217-7yrngPdCCcTC70gdq7fw9NJW',
   json_file_store: '../db/',
 }).startRTM()
 
 
 controller.hears(['test'], ['direct_message'], function(bot, message){
     //start a convo with the test bot
-
 })
 
 
@@ -493,28 +492,18 @@ var sendOutReminder = function(res, convo, response){
 module.exports.receiveConvo = function(convo){
 
 
-  console.log('received Convo');
-  console.log(JSON.stringify(convo));
-  //, channel:'C0NGETH71'
   var convoObject = convo;
 
-
-
-  console.log("Starting a convo");
-  console.log(convoObject);
-
   var ask1 = function(response, convo){
-    console.log("ask1");
+    console.log('508: ' + JSON.stringify(convoObject));
     convo.convoObject = convoObject;
 
     if(convo.convoObject.questions[0]){
       console.log("past if");
-
+      console.log(convo.convoObject.questions[0]);
       convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
-        convo.say("Awesome.");
         console.log("ask2 start here");
-        console.log(convo);
 
         //breaking with 2 different surveys at the same time
         convo.next();
@@ -538,7 +527,6 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[1].question, function(response, convo) {
 
-        convo.say("Awesome.");
         ask3(response, convo);
         convo.next();
       });
@@ -558,7 +546,6 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[2].question, function(response, convo) {
 
-        convo.say("Awesome.");
         ask4(response, convo);
         convo.next();
       });
@@ -577,7 +564,6 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[3].question, function(response, convo) {
 
-        convo.say("Awesome.");
         ask5(response, convo);
         convo.next();
       });
@@ -596,7 +582,6 @@ module.exports.receiveConvo = function(convo){
 
       convo.ask(convo.convoObject.questions[4].question, function(response, convo) {
 
-        convo.say("Awesome.");
         convo.say("Bye");
         closeSurvey(response,convo);
         convo.next();
@@ -715,9 +700,9 @@ module.exports.receiveConvo = function(convo){
   }
 
 
-  console.log(convoObject.userContactInfo.slack_Id);
+  console.log(convoObject.userContactInfo.slackId);
   console.log(convoObject.type);
-  bot.startPrivateConversation({user:convoObject.userContactInfo.slack_Id}, ask1);
+  bot.startConversation({user: 'U24TDF6AC', channel: 'C24TNEECF'}, ask1);
 
 
 }
