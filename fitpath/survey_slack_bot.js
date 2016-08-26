@@ -37,7 +37,7 @@ var responses = [];
 var index = 0;
 var dndStatus = [];
 var production = false;
-var thom = 'U0M4AB3M0';
+
 var newUser = [];
 
 //set this flag to a process.env.debug flag prob
@@ -179,7 +179,8 @@ var pathStart = function (assignments, bot, message, user) {
       console.log(output);
     })
     console.log(output);
-    convo.ask("Hey " + user.fullName + "! \n Here are the your reminders. \n Enter a number to complete that task and your response. \n Enter q to finish." + output, arrayCreate(assignmentLayout, user));
+    var fullstring =  "Hey " + user.fullName + "! \n Here are the your reminders. \n Enter a number to complete that task and your response. \n Enter q to finish." + output;
+    convo.ask(fullstring, arrayCreate(assignmentLayout, user));
   });
 
 };
@@ -204,7 +205,7 @@ var arrayCreate = function (assignmentLayout, user){
     pattern: new RegExp(/^(q|Q)/i),
     callback: function (response, convo) {
       convo.say("Have a good day!");
-      updatedList(user)
+      updatedList(convo, response, user, assignmentLayout)
       convo.next();
     }
   }
@@ -224,7 +225,122 @@ var arrayCreate = function (assignmentLayout, user){
 
 }
 
-var updatedList = function (response, convo, user) {
+
+
+
+var completedByNum = function (text, response, convo) {
+
+  var addDays = function(date, days){
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    console.log("date");
+    console.log(result);
+    return result;
+  }
+  var nextWeek = addDays(text.info.specificDate, 7);
+  var yearNext = nextWeek.getFullYear();
+  var monthNext = nextWeek.getMonth();
+  var dateNext= nextWeek.getDate();
+  var hoursNext = nextWeek.getHours();
+  var minutesNext = nextWeek.getMinutes();
+
+
+  if(text.info.completed !== true && text.info.sent !== true){
+    console.log("text.info");
+    console.log(text.info);
+    console.log(response.match.input);
+    var answer = response.match.input.slice(1, response.match.input.length);
+    console.log(answer);
+
+    var sentResponse = {
+      type: 'reminder',
+      timeStamp: new Date(),
+      assignment: text.info._id,
+      userId: text.info.userId,
+      reminderId: text.info.reminderId._id,
+      questions: [
+        {
+          question: text.info.reminderId.title,
+          type: 'WRITTEN',
+          answer: answer
+        }
+      ]
+    }
+    console.log(sentResponse);
+
+    request({url: 'http://localhost:12557/api/response/create', method: "POST", json: true, body: sentResponse }, function(err, response){
+      if(err){
+        console.log("crap");
+        console.log(err);
+      }
+      else{
+        console.log("sweet");
+        console.log(response.body);
+
+        if(text.info.repeat){
+          var reminderUserAssign = {
+            repeat: text.info.repeat,
+            specificDate: nextWeek,
+            year: yearNext,
+            month: monthNext,
+            date: dateNext,
+            hours: hoursNext,
+            minutes: minutesNext,
+            userId: text.info.userId,
+            reminderId: text.info.reminderId._id,
+            type: 'reminder'
+          }
+          console.log(reminderUserAssign);
+
+          console.log("Im heading out");
+          //TODO change ip
+          request({url: 'http://localhost:12557/api/assignment/create', method: "POST", headers: {"content-type": "application/json"}, json: reminderUserAssign}, function (err, response, body) {
+            console.log("sweet");
+            if(err){
+              console.log("ERROR");
+              console.log(err);
+            }
+            else {
+              console.log('response');
+              console.log(response.statusCode);
+            }
+          });
+
+        }
+      }
+
+    })
+  }
+  request({url: 'http://localhost:12557/api/assignment/sent/update/' + text.info._id, method: "PUT"}, function(err, response){
+    console.log("sweet 2");
+    if(err){
+      console.log("error");
+      console.log(err);
+    }
+    else{
+      console.log('response');
+      console.log(response.statusCode);
+    }
+  });
+
+
+
+  request({url: 'http://localhost:12557/api/assignment/completed/update/'+  text.info._id, method:"PUT"}, function(err, response){
+    console.log("sweet 2");
+    if(err){
+      console.log("error");
+      console.log(err);
+    }
+    else{
+      console.log('response');
+      console.log(response.statusCode);
+    }
+  });
+
+}
+
+
+var updatedList = function (convo, response, user, assignmentLayout) {
   console.log(user.id);
 
 
@@ -296,27 +412,10 @@ var endPath = function (response, convo) {
 
 
 
-var completedByNum = function (text, response, convo) {
-  console.log(text.info);
-  var res = convo.extractResponses('response');
-  console.log('res');
-  console.log(res);
 
-  // request({url: 'http://localhost:12557/api/response/create' + })
 
-  request({url: 'http://localhost:12557/api/assignment/completed/update/'+  text.info._id, method:"PUT"}, function(err, response){
-    console.log("sweet 2");
-    if(err){
-      console.log("error");
-      console.log(err);
-    }
-    else{
-      console.log('response');
-      console.log(response.statusCode);
-    }
-  });
 
-}
+
 
 
 var reminderConversation = function(bot, message){
