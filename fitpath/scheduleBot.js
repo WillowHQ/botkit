@@ -2,6 +2,7 @@
 //
 
 var Botkit = require('../lib/Botkit.js');
+var TwilioSMSBot = require('botkit-sms');
 
 //Thom is adding in dotenv so everything on this process will have access to the env variables
 var express = require('express');
@@ -76,6 +77,36 @@ app.post('/survey', function (req, res) {
         bot.reply(message, 'Yes');
         if (questions.length == 4) {
           res.json(questions);
+        }
+      }
+    });
+
+    // As above, but using Twilio sms
+    var twilioController = TwilioSMSBot({
+      account_sid: 'ACf83693e222a7ade08080159c4871c9e3',
+      auth_token: '20b36bd42a33cd249e0079a6a1e8e0dd',
+      twilio_number: '+12044006422'
+    });
+
+    var twilioBot = twilioController.spawn({});
+
+    twilioController.setupWebserver(3812, function (err, webserver) {
+      twilioController.createWebhookEndpoints(twilioController.webserver, twilioBot, function () {
+        console.log('TwilioSMSBot is online.');
+      });
+    });
+
+    // Keep track of the questions that were asked
+    var twilioQuestions = [];
+
+    twilioController.on('message_received', function(bot, message) {
+      // Prevent the test bot from responding to itself
+      if (message.text !== 'Yes') {
+        twilioQuestions.push(message.text);
+        console.log(twilioQuestions);
+        twilioBot.reply(message, 'Yes');
+        if (twilioQuestions.length == 4) {
+          res.json(twilioQuestions);
         }
       }
     });
