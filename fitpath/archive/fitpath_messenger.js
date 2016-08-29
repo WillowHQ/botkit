@@ -1,4 +1,4 @@
-var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../../lib/Botkit.js');
 var request = require('request');
 
 var controller = Botkit.facebookbot({

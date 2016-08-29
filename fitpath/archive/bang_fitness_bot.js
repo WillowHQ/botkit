@@ -1,8 +1,8 @@
-var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../../lib/Botkit.js');
 var moment = require('moment');
 var _ = require('underscore');
 var request = require('request');
-var db = require('../lib/storage/simple_storage.js');
+var db = require('../../lib/storage/simple_storage.js');
 
 var controller = Botkit.slackbot({
   json_file_store: '../db/',

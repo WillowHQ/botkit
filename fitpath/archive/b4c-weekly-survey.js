@@ -1,9 +1,9 @@
-var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../../lib/Botkit.js');
 var moment = require('moment');
 var _ = require('underscore');
 var request = require('request');
 var rp = require('request-promise');
-var db = require('../lib/storage/simple_storage.js');
+var db = require('../../lib/storage/simple_storage.js');
 
 var responses = [];
 var users = [];

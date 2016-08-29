@@ -1,4 +1,4 @@
-var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../../lib/Botkit.js');
 var mongoose = require('mongoose');
 var RiveScript = require('rivescript');
 

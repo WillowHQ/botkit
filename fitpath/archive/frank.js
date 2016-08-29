@@ -1,4 +1,4 @@
-var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../../lib/Botkit.js');
 var _ = require('underscore');
 var moment = require('moment');
 var request = require('request');

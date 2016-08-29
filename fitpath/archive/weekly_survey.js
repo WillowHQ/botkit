@@ -1,5 +1,5 @@
-var Botkit = require('../lib/Botkit.js');
-var db = require('../lib/storage/simple_storage.js');
+var Botkit = require('../../lib/Botkit.js');
+var db = require('../../lib/storage/simple_storage.js');
 var _ = require('underscore');
 var moment = require('moment');
 

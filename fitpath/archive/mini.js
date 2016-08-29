@@ -1,7 +1,7 @@
-var Botkit = require('../lib/Botkit.js');
+var Botkit = require('../../lib/Botkit.js');
 var request = require('request');
 var rp = require('request-promise');
-var db = require('../lib/storage/simple_storage.js');
+var db = require('../../lib/storage/simple_storage.js');
 
 var joshFakeSID = 'ACff7725010f7d698d5ae355d8fa140218'
 var joshFakeToken = '50e0e7bdcc18a4bf9e7c769953125f01';
