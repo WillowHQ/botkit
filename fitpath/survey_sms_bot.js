@@ -48,19 +48,19 @@ var request = require('request');
 var counter = 0;
 var _ = require('underscore');
 
-var convoObject =
-   {
-     userId: '5784f67bf87bfc21174bc93f',
-     userMedium: 'slack',
-     userContactInfo: {name: 'jlaver', phoneNumber: '+15064261732', slackId: 'U136W8M0W'},
-     questions: [
-       {question: 'Do you like pancakes?'},
-       {question: 'Do you like waffles?'},
-       {question: 'Do you like french toast?'}
-     ],
-     surveyId: '35435436afaf',
-     type: 'survey'
- };
+// var convoObject =
+//    {
+//      userId: '5784f67bf87bfc21174bc93f',
+//      userMedium: 'slack',
+//      userContactInfo: {name: 'jlaver', phoneNumber: '+15064261732', slackId: 'U136W8M0W'},
+//      questions: [
+//        {question: 'Do you like pancakes?'},
+//        {question: 'Do you like waffles?'},
+//        {question: 'Do you like french toast?'}
+//      ],
+//      surveyId: '35435436afaf',
+//      type: 'survey'
+//  };
 
 
 
@@ -119,7 +119,59 @@ module.exports.receiveConvo = function(convo){
 
       });
 
-    }else{
+    }
+    else if(convo.convoObject.questions[0] && convo.convoObject.type === "reminder"){
+
+        convo.ask(convo.convoObject.questions[0].question,
+
+            [
+                {
+                    pattern: bot.utterances.yes, //stuck on yes
+                    callback: function(response, convo){
+                        convo.say("Great work, keep it up! Reporting your progress to FitPath asap! :)");
+                        closeSurvey(response,convo);
+                        convo.next();
+                    }
+                },
+                {
+                    pattern: bot.utterances.no,
+                    callback: function(response, convo){
+                        convo.say("You’ll get em next time!");
+                        closeSurvey(response,convo);
+                        convo.next();
+                    }
+                },
+                {
+                    default: true,
+                    callback: function (response, convo) {
+                        convo.say("I’m a bot so I don’t know what you just said, but I’ll go ask a human and they will follow up!");
+                        closeSurvey(response,convo);
+                        convo.next();
+                    }
+
+                }
+
+            ]
+        )
+    }
+    else if(convo.convoObject.questions[0] && convo.convoObject.type === "survey"){
+        console.log("in 1");
+        convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
+
+            //convo.say("Awesome.");
+            console.log("ask2 start here");
+            console.log(convo);
+
+            //breaking with 2 different surveys at the same time
+            convo.next();
+            console.log("after next");
+
+            ask2(response, convo);
+
+        });
+    }
+
+    else{
       convo.say("Bye");
       closeSurvey(response,convo);
       convo.next();

@@ -440,7 +440,7 @@ module.exports.receiveConvo = function(convo){
 		console.log("in 1");
 		convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
-		  convo.say("Awesome.");
+		  //convo.say("Awesome.");
 		  console.log("ask2 start here");
 		  console.log(convo);
 
@@ -490,7 +490,7 @@ module.exports.receiveConvo = function(convo){
 		console.log("in 1");
 		convo.ask(convo.convoObject.questions[0].question, function(response, convo) {
 
-		  convo.say("Awesome.");
+		  //convo.say("Awesome.");
 		  console.log("ask2 start here");
 		  console.log(convo);
 
@@ -517,7 +517,7 @@ module.exports.receiveConvo = function(convo){
 
 	  convo.ask(convo.convoObject.questions[1].question, function(response, convo) {
 
-		convo.say("Awesome.");
+		//convo.say("Awesome.");
 		ask3(response, convo);
 		convo.next();
 	  });
@@ -537,7 +537,7 @@ module.exports.receiveConvo = function(convo){
 
 	  convo.ask(convo.convoObject.questions[2].question, function(response, convo) {
 
-		convo.say("Awesome.");
+		//convo.say("Awesome.");
 		ask4(response, convo);
 		convo.next();
 	  });
@@ -556,7 +556,7 @@ module.exports.receiveConvo = function(convo){
 
 	  convo.ask(convo.convoObject.questions[3].question, function(response, convo) {
 
-		convo.say("Awesome.");
+		//convo.say("Awesome.");
 		ask5(response, convo);
 		convo.next();
 	  });
@@ -575,7 +575,7 @@ module.exports.receiveConvo = function(convo){
 
 	  convo.ask(convo.convoObject.questions[4].question, function(response, convo) {
 
-		convo.say("Awesome.");
+		//convo.say("Awesome.");
 		convo.say("Bye");
 		closeSurvey(response,convo);
 		convo.next();
