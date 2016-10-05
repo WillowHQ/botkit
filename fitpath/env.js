@@ -16,7 +16,7 @@ module.exports = {
 
     //local
     serverIp: 'localhost',
-    phoneNumber: '+12045002308',
+    phoneNumber: '+12045002562',
     server_url: 'localhost:27182'
 
 
